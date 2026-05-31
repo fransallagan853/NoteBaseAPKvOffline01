@@ -51,6 +51,10 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupActions() {
+        binding.btnKeyboardSettings.setOnClickListener {
+            startActivity(Intent(this, KeyboardSettingsActivity::class.java))
+        }
+
         binding.btnClearData.setOnClickListener {
             showClearDataDialog()
         }

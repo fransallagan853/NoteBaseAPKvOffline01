@@ -89,6 +89,29 @@
 
             <TextView
                 android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Aplikasi"
+                android:textColor="@color/cyan_accent"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textAllCaps="true" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnKeyboardSettings"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:text="Pengaturan Keyboard"
+                android:textColor="@color/white_text"
+                app:backgroundTint="@color/charcoal_bg"
+                app:cornerRadius="12dp"
+                android:gravity="start|center_vertical"
+                android:paddingStart="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:text="Manajemen Data"
@@ -175,7 +198,6 @@
         android:background="@color/charcoal_bg"
         android:elevation="8dp"
         android:orientation="horizontal"
-        android:layout_marginBottom="48dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
@@ -185,17 +207,15 @@
             android:layout_weight="1"
             android:background="?attr/selectableItemBackground"
             android:gravity="center"
-            android:orientation="vertical">
-
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
             <ImageView
-                android:id="@+id/ivHome"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_home"
                 app:tint="@color/gray_text" />
-
             <TextView
-                android:id="@+id/tvHome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -211,17 +231,15 @@
             android:layout_weight="1"
             android:background="?attr/selectableItemBackground"
             android:gravity="center"
-            android:orientation="vertical">
-
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
             <ImageView
-                android:id="@+id/ivImport"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_import"
                 app:tint="@color/gray_text" />
-
             <TextView
-                android:id="@+id/tvImport"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -237,17 +255,15 @@
             android:layout_weight="1"
             android:background="?attr/selectableItemBackground"
             android:gravity="center"
-            android:orientation="vertical">
-
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
             <ImageView
-                android:id="@+id/ivSettings"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_settings"
                 app:tint="@color/cyan_accent" />
-
             <TextView
-                android:id="@+id/tvSettings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"

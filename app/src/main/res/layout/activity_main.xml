@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/black_bg">
 
-    <!-- Header Section with Safe Area -->
+    <!-- Header Section -->
     <LinearLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
@@ -25,7 +25,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
                 <TextView
                     android:id="@+id/tvTitle"
                     android:layout_width="wrap_content"
@@ -34,7 +33,6 @@
                     android:textColor="@color/cyan_accent"
                     android:textSize="26sp"
                     android:textStyle="bold" />
-
                 <TextView
                     android:id="@+id/tvTagline"
                     android:layout_width="wrap_content"
@@ -82,8 +80,9 @@
             android:paddingHorizontal="16dp"
             android:textColor="@color/white_text"
             android:textColorHint="@color/gray_text"
-            android:textSize="15sp" />
-
+            android:textSize="15sp"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
     </LinearLayout>
 
     <TextView
@@ -101,7 +100,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headerLayout" />
 
-    <!-- Content Section - Compact RecyclerView -->
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvGroup"
         android:layout_width="match_parent"
@@ -109,21 +108,22 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="4dp"
         android:clipToPadding="false"
-        android:paddingBottom="110dp"
-        app:layout_constraintBottom_toTopOf="@id/layoutKeyboard"
+        android:paddingBottom="100dp"
+        app:layout_constraintBottom_toTopOf="@id/keyboardContainer"
         app:layout_constraintTop_toBottomOf="@id/tvSearchLabel"
         tools:listitem="@layout/item_nopol_group" />
 
-    <!-- Custom Keyboard -->
-    <include
-        android:id="@+id/layoutKeyboard"
-        layout="@layout/layout_custom_keyboard"
+    <!-- Dynamic Custom Keyboard Container -->
+    <FrameLayout
+        android:id="@+id/keyboardContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
+        android:background="@color/black_bg"
+        android:elevation="15dp"
         app:layout_constraintBottom_toTopOf="@id/bottomNav" />
 
-    <!-- Floating Action Button -->
+    <!-- FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="wrap_content"
@@ -134,15 +134,15 @@
         app:backgroundTint="@color/cyan_accent"
         app:elevation="6dp"
         app:fabSize="normal"
-        app:layout_constraintBottom_toTopOf="@id/layoutKeyboard"
+        app:layout_constraintBottom_toTopOf="@id/keyboardContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@color/black_bg" />
 
-    <!-- Ramped Footer / Bottom Navigation -->
+    <!-- Bottom Navigation -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="62dp"
         android:background="@color/charcoal_bg"
         android:elevation="12dp"
         android:orientation="horizontal"
@@ -158,16 +158,12 @@
             android:orientation="vertical"
             android:clickable="true"
             android:focusable="true">
-
             <ImageView
-                android:id="@+id/ivHome"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_home"
                 app:tint="@color/cyan_accent" />
-
             <TextView
-                android:id="@+id/tvHome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -187,16 +183,12 @@
             android:orientation="vertical"
             android:clickable="true"
             android:focusable="true">
-
             <ImageView
-                android:id="@+id/ivImport"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_import"
                 app:tint="@color/gray_text" />
-
             <TextView
-                android:id="@+id/tvImport"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -215,16 +207,12 @@
             android:orientation="vertical"
             android:clickable="true"
             android:focusable="true">
-
             <ImageView
-                android:id="@+id/ivSettings"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_settings"
                 app:tint="@color/gray_text" />
-
             <TextView
-                android:id="@+id/tvSettings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"

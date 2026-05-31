@@ -1,11 +1,14 @@
 package com.notebaseapk
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -29,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var groupAdapter: GroupAdapter
     private lateinit var nopolAdapter: NopolAdapter
     private var searchJob: Job? = null
+    private var inflatedKeyboard: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         db = AppDatabase.getDatabase(this)
         setupRecyclerViews()
         setupSearch()
-        setupCustomKeyboard()
         setupFab()
         setupMenu()
         setupBottomNav()
@@ -49,17 +52,23 @@ class MainActivity : AppCompatActivity() {
         performSearch("")
         checkAndInsertDummyData()
     }
+
+    override fun onStart() {
+        super.onStart()
+        // Load keyboard layout every time activity starts to reflect setting changes
+        setupCustomKeyboard()
+    }
+
     private fun setupSafeBottomNav() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
             val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-
             val params = view.layoutParams as ConstraintLayout.LayoutParams
             params.bottomMargin = navBarHeight
             view.layoutParams = params
-
             insets
         }
     }
+
     private fun setupRecyclerViews() {
         groupAdapter = GroupAdapter(emptyList()) { group ->
             val intent = Intent(this, GroupDetailActivity::class.java)
@@ -81,11 +90,11 @@ class MainActivity : AppCompatActivity() {
         binding.etSearch.showSoftInputOnFocus = false
         
         binding.etSearch.setOnFocusChangeListener { _, hasFocus ->
-            binding.layoutKeyboard.root.visibility = if (hasFocus) View.VISIBLE else View.GONE
+            binding.keyboardContainer.visibility = if (hasFocus) View.VISIBLE else View.GONE
         }
         
         binding.etSearch.setOnClickListener {
-            binding.layoutKeyboard.root.visibility = View.VISIBLE
+            binding.keyboardContainer.visibility = View.VISIBLE
         }
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
@@ -98,29 +107,41 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupCustomKeyboard() {
-        val keyboard = binding.layoutKeyboard
+        val sharedPref = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
+        val layoutKey = sharedPref.getString("keyboard_layout", "default") ?: "default"
         
-        val buttons = listOf(
-            keyboard.btn0, keyboard.btn1, keyboard.btn2, keyboard.btn3, keyboard.btn4,
-            keyboard.btn5, keyboard.btn6, keyboard.btn7, keyboard.btn8, keyboard.btn9,
-            keyboard.btnQ, keyboard.btnW, keyboard.btnE, keyboard.btnR, keyboard.btnT, 
-            keyboard.btnY, keyboard.btnU, keyboard.btnI, keyboard.btnO, keyboard.btnP,
-            keyboard.btnA, keyboard.btnS, keyboard.btnD, keyboard.btnF, keyboard.btnG, 
-            keyboard.btnH, keyboard.btnJ, keyboard.btnK, keyboard.btnL,
-            keyboard.btnZ, keyboard.btnX, keyboard.btnC, keyboard.btnV, keyboard.btnB, 
-            keyboard.btnN, keyboard.btnM
+        val layoutRes = when (layoutKey) {
+            "qwerty_numpad" -> R.layout.layout_keyboard_qwerty_numpad
+            "numpad_top" -> R.layout.layout_keyboard_numpad_top
+            "numpad_bottom" -> R.layout.layout_keyboard_numpad_bottom
+            else -> R.layout.layout_keyboard_default
+        }
+
+        binding.keyboardContainer.removeAllViews()
+        inflatedKeyboard = LayoutInflater.from(this).inflate(layoutRes, binding.keyboardContainer, true)
+
+        val root = binding.keyboardContainer
+        
+        // Setup all character buttons
+        val buttonIds = listOf(
+            R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4, R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9,
+            R.id.btnQ, R.id.btnW, R.id.btnE, R.id.btnR, R.id.btnT, R.id.btnY, R.id.btnU, R.id.btnI, R.id.btnO, R.id.btnP,
+            R.id.btnA, R.id.btnS, R.id.btnD, R.id.btnF, R.id.btnG, R.id.btnH, R.id.btnJ, R.id.btnK, R.id.btnL,
+            R.id.btnZ, R.id.btnX, R.id.btnC, R.id.btnV, R.id.btnB, R.id.btnN, R.id.btnM
         )
 
-        buttons.forEach { button ->
-            button.setOnClickListener {
-                appendSearchText((it as Button).text.toString())
+        buttonIds.forEach { id ->
+            root.findViewById<View>(id)?.setOnClickListener {
+                if (it is Button) {
+                    appendSearchText(it.text.toString())
+                }
             }
         }
 
-        keyboard.btnClear.setOnClickListener { clearSearch() }
-        keyboard.btnBackspace.setOnClickListener { deleteChar() }
-        keyboard.btnSearch.setOnClickListener {
-            binding.layoutKeyboard.root.visibility = View.GONE
+        root.findViewById<View>(R.id.btnClear)?.setOnClickListener { clearSearch() }
+        root.findViewById<View>(R.id.btnBackspace)?.setOnClickListener { deleteChar() }
+        root.findViewById<View>(R.id.btnSearch)?.setOnClickListener {
+            binding.keyboardContainer.visibility = View.GONE
             binding.etSearch.clearFocus()
         }
     }
