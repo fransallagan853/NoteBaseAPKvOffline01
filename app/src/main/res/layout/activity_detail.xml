@@ -305,11 +305,9 @@
                 android:layout_weight="1"
                 android:text="Bagikan"
                 android:textColor="@color/white_text"
-                app:backgroundTint="@color/charcoal_bg"
                 app:icon="@drawable/ic_share"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp"
-                app:iconTint="@color/white_text"/>
+                app:iconTint="@color/white_text"
+                app:backgroundTint="@color/charcoal_bg" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCopy"
@@ -319,9 +317,9 @@
                 android:layout_weight="1"
                 android:text="Salin"
                 android:textColor="@color/white_text"
-                app:backgroundTint="@color/charcoal_bg"
                 app:icon="@drawable/ic_copy"
-                app:iconTint="@color/white_text"/>
+                app:iconTint="@color/white_text"
+                app:backgroundTint="@color/charcoal_bg" />
         </LinearLayout>
 
         <LinearLayout
@@ -338,9 +336,9 @@
                 android:layout_weight="1"
                 android:text="Edit"
                 android:textColor="@color/cyan_accent"
-                app:strokeColor="@color/cyan_accent"
                 app:icon="@drawable/ic_edit"
-                app:iconTint="@color/cyan_accent"/>
+                app:iconTint="@color/cyan_accent"
+                app:strokeColor="@color/cyan_accent" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDelete"
@@ -350,9 +348,9 @@
                 android:layout_weight="1"
                 android:text="Hapus"
                 android:textColor="@color/red_delete"
-                app:strokeColor="@color/red_delete"
                 app:icon="@drawable/ic_delete"
-                app:iconTint="@color/red_delete"/>
+                app:iconTint="@color/red_delete"
+                app:strokeColor="@color/red_delete" />
         </LinearLayout>
 
     </LinearLayout>

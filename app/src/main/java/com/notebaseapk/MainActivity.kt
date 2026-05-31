@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -33,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var groupAdapter: GroupAdapter
     private lateinit var nopolAdapter: NopolAdapter
     private var searchJob: Job? = null
+    private var inflatedKeyboard: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,7 +86,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupSearch() {
-        // Force hide system keyboard
         binding.etSearch.showSoftInputOnFocus = false
         
         binding.etSearch.setOnFocusChangeListener { _, hasFocus ->
@@ -124,7 +123,6 @@ class MainActivity : AppCompatActivity() {
         binding.keyboardContainer.removeAllViews()
         val view = LayoutInflater.from(this).inflate(layoutRes, binding.keyboardContainer, true)
 
-        // Setup all character buttons
         val buttonIds = listOf(
             R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4, R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9,
             R.id.btnQ, R.id.btnW, R.id.btnE, R.id.btnR, R.id.btnT, R.id.btnY, R.id.btnU, R.id.btnI, R.id.btnO, R.id.btnP,
@@ -213,12 +211,12 @@ class MainActivity : AppCompatActivity() {
     private fun setupMenu() {
         binding.btnMenu.setOnClickListener { view ->
             val popup = PopupMenu(this, view)
-            popup.menu.add("Import Data")
-            popup.menu.add("Pengaturan")
+            popup.menu.add("Pengaturan Keyboard")
+            popup.menu.add("Pengaturan Aplikasi")
             popup.setOnMenuItemClickListener { item ->
                 when (item.title) {
-                    "Import Data" -> startActivity(Intent(this, ImportActivity::class.java))
-                    "Pengaturan" -> startActivity(Intent(this, SettingsActivity::class.java))
+                    "Pengaturan Keyboard" -> startActivity(Intent(this, KeyboardSettingsActivity::class.java))
+                    "Pengaturan Aplikasi" -> startActivity(Intent(this, SettingsActivity::class.java))
                 }
                 true
             }
@@ -252,30 +250,12 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val count = db.kendaraanDao().getCountSync()
             if (count == 0) {
-                val dummyList = mutableListOf<Kendaraan>()
                 val mandatory = listOf(
                     Triple("B 6372 EDC", "Toyota Fortuner", "ADIRA"),
                     Triple("B 6372 EFC", "Toyota Rush", "OTTO"),
                     Triple("D 6372 SCS", "Honda Jazz", "BCA")
                 )
-
-                for (d in mandatory) {
-                    val nopol = d.first
-                    val nama = d.second
-                    val leasing = d.third
-                    val group = extractGroup(nopol)
-                    val searchKey = generateSearchKey(nopol, nama, leasing)
-                    
-                    dummyList.add(Kendaraan(
-                        nopol = nopol,
-                        groupNumber = group,
-                        namaKendaraan = nama,
-                        leasing = leasing,
-                        searchKey = searchKey,
-                        catatan = "Unit dummy"
-                    ))
-                }
-                db.kendaraanDao().insertAll(mandatory.mapIndexed { index, triple ->
+                db.kendaraanDao().insertAll(mandatory.mapIndexed { _, triple ->
                     val nopol = triple.first
                     Kendaraan(
                         nopol = nopol,

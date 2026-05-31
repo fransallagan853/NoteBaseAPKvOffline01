@@ -6,13 +6,14 @@
     android:background="@color/black_bg"
     android:orientation="vertical"
     android:padding="4dp"
+    android:paddingBottom="12dp"
     android:clickable="true"
     android:focusable="true">
 
     <!-- Baris 1: Q W E R T Y U I O P -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="42dp"
+        android:layout_height="40dp"
         android:orientation="horizontal">
         <Button android:id="@+id/btnQ" style="@style/KeyboardBtnAlpha" android:text="Q" android:focusable="false" />
         <Button android:id="@+id/btnW" style="@style/KeyboardBtnAlpha" android:text="W" android:focusable="false" />
@@ -29,9 +30,9 @@
     <!-- Baris 2: A S D F G H J K L -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="42dp"
+        android:layout_height="40dp"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp">
+        android:paddingHorizontal="16dp">
         <Button android:id="@+id/btnA" style="@style/KeyboardBtnAlpha" android:text="A" android:focusable="false" />
         <Button android:id="@+id/btnS" style="@style/KeyboardBtnAlpha" android:text="S" android:focusable="false" />
         <Button android:id="@+id/btnD" style="@style/KeyboardBtnAlpha" android:text="D" android:focusable="false" />
@@ -46,7 +47,7 @@
     <!-- Baris 3: Z X C V B N M [SEARCH] -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="42dp"
+        android:layout_height="40dp"
         android:orientation="horizontal">
         <Button android:id="@+id/btnZ" style="@style/KeyboardBtnAlpha" android:text="Z" android:focusable="false" />
         <Button android:id="@+id/btnX" style="@style/KeyboardBtnAlpha" android:text="X" android:focusable="false" />
@@ -70,7 +71,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider_color"
-        android:layout_marginVertical="4dp" />
+        android:layout_marginVertical="6dp" />
 
     <!-- Baris 4: 1 2 3 -->
     <LinearLayout
