@@ -1,6 +1,7 @@
 package com.notebaseapk.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.notebaseapk.data.Kendaraan
@@ -39,6 +40,16 @@ class NopolAdapter(
             if (!item.leasing.isNullOrEmpty()) details.add(item.leasing)
             
             binding.tvDetail.text = details.joinToString(" • ")
+            
+            if (!item.saldo.isNullOrEmpty() || !item.overdue.isNullOrEmpty()) {
+                binding.tvExtra.visibility = View.VISIBLE
+                val saldoStr = if (item.saldo.isNullOrEmpty()) "-" else item.saldo
+                val ovdStr = if (item.overdue.isNullOrEmpty()) "-" else item.overdue
+                binding.tvExtra.text = "Saldo: $saldoStr • OVD: $ovdStr"
+            } else {
+                binding.tvExtra.visibility = View.GONE
+            }
+            
             binding.root.setOnClickListener { onItemClick(item) }
         }
     }

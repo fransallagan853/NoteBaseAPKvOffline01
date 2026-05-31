@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
@@ -32,7 +33,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var groupAdapter: GroupAdapter
     private lateinit var nopolAdapter: NopolAdapter
     private var searchJob: Job? = null
-    private var inflatedKeyboard: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +55,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        // Load keyboard layout every time activity starts to reflect setting changes
         setupCustomKeyboard()
     }
 
@@ -87,14 +86,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupSearch() {
+        // Force hide system keyboard
         binding.etSearch.showSoftInputOnFocus = false
         
         binding.etSearch.setOnFocusChangeListener { _, hasFocus ->
             binding.keyboardContainer.visibility = if (hasFocus) View.VISIBLE else View.GONE
         }
         
-        binding.etSearch.setOnClickListener {
-            binding.keyboardContainer.visibility = View.VISIBLE
+        binding.etSearch.setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                v.requestFocus()
+                binding.keyboardContainer.visibility = View.VISIBLE
+            }
+            false
         }
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
@@ -118,10 +122,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.keyboardContainer.removeAllViews()
-        inflatedKeyboard = LayoutInflater.from(this).inflate(layoutRes, binding.keyboardContainer, true)
+        val view = LayoutInflater.from(this).inflate(layoutRes, binding.keyboardContainer, true)
 
-        val root = binding.keyboardContainer
-        
         // Setup all character buttons
         val buttonIds = listOf(
             R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4, R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9,
@@ -131,16 +133,16 @@ class MainActivity : AppCompatActivity() {
         )
 
         buttonIds.forEach { id ->
-            root.findViewById<View>(id)?.setOnClickListener {
+            view.findViewById<View>(id)?.setOnClickListener {
                 if (it is Button) {
                     appendSearchText(it.text.toString())
                 }
             }
         }
 
-        root.findViewById<View>(R.id.btnClear)?.setOnClickListener { clearSearch() }
-        root.findViewById<View>(R.id.btnBackspace)?.setOnClickListener { deleteChar() }
-        root.findViewById<View>(R.id.btnSearch)?.setOnClickListener {
+        view.findViewById<View>(R.id.btnClear)?.setOnClickListener { clearSearch() }
+        view.findViewById<View>(R.id.btnBackspace)?.setOnClickListener { deleteChar() }
+        view.findViewById<View>(R.id.btnSearch)?.setOnClickListener {
             binding.keyboardContainer.visibility = View.GONE
             binding.etSearch.clearFocus()
         }
@@ -225,8 +227,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNav() {
-        binding.menuImport.setOnClickListener {
-            startActivity(Intent(this, ImportActivity::class.java))
+        binding.menuHome.setOnClickListener {
+            performSearch("")
+        }
+        binding.menuSync.setOnClickListener {
+            startActivity(Intent(this, SyncActivity::class.java))
             overridePendingTransition(0, 0)
         }
         binding.menuSettings.setOnClickListener {
@@ -270,7 +275,17 @@ class MainActivity : AppCompatActivity() {
                         catatan = "Unit dummy"
                     ))
                 }
-                db.kendaraanDao().insertAll(dummyList)
+                db.kendaraanDao().insertAll(mandatory.mapIndexed { index, triple ->
+                    val nopol = triple.first
+                    Kendaraan(
+                        nopol = nopol,
+                        groupNumber = extractGroup(nopol),
+                        namaKendaraan = triple.second,
+                        leasing = triple.third,
+                        searchKey = generateSearchKey(nopol, triple.second, triple.third),
+                        catatan = "Unit dummy"
+                    )
+                })
             }
         }
     }
