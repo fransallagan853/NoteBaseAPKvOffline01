@@ -20,6 +20,8 @@ data class Kendaraan(
     val leasing: String,
     val saldo: String = "",
     val overdue: String = "",
-    val catatan: String,
-    val searchKey: String = ""
+    var catatan: String,
+    val searchKey: String = "",
+    var editorName: String? = null,
+    var editorPhone: String? = null
 )

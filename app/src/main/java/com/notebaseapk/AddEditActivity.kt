@@ -66,6 +66,10 @@ class AddEditActivity : AppCompatActivity() {
             return
         }
 
+        // Menampilkan Toast sesuai visibilitas yang dipilih
+        val mode = if (binding.rbPublish.isChecked) "Publish" else "Privat"
+        Toast.makeText(this, "Mode data: $mode", Toast.LENGTH_SHORT).show()
+
         val groupNumber = extractGroup(nopol)
         val searchKey = generateSearchKey(nopol, nama, tahun, warna, leasing, saldo, ovd, catatan)
 

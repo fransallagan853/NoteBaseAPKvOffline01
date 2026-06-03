@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -48,6 +49,14 @@ class DetailActivity : AppCompatActivity() {
                 binding.tvSaldo.text = it.saldo.ifEmpty { "-" }
                 binding.tvOverdue.text = it.overdue.ifEmpty { "-" }
                 binding.tvCatatan.text = it.catatan.ifEmpty { "Tidak ada catatan" }
+
+                if (!it.editorName.isNullOrEmpty()) {
+                    binding.editorInfoLayout.visibility = View.VISIBLE
+                    binding.tvEditorName.text = "Nama: ${it.editorName}"
+                    binding.tvEditorPhone.text = "No Telp: ${it.editorPhone ?: "-"}"
+                } else {
+                    binding.editorInfoLayout.visibility = View.GONE
+                }
             } ?: run {
                 finish()
             }
@@ -55,8 +64,8 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun setupActions() {
-        binding.btnEdit.setOnClickListener {
-            val intent = Intent(this, AddEditActivity::class.java)
+        binding.btnNote.setOnClickListener {
+            val intent = Intent(this, NoteEditActivity::class.java)
             intent.putExtra("VEHICLE_ID", vehicleId)
             startActivity(intent)
         }
@@ -75,7 +84,7 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun buildShareText(it: Kendaraan): String {
-        return """
+        var text = """
             noteBase - Detail Data
 
             Nomor Polisi: ${it.nopol}
@@ -89,6 +98,12 @@ class DetailActivity : AppCompatActivity() {
             Overdue/OVD: ${it.overdue.ifEmpty { "-" }}
             Catatan: ${it.catatan.ifEmpty { "-" }}
         """.trimIndent()
+
+        if (!it.editorName.isNullOrEmpty()) {
+            text += "\n\nDiedit oleh:\nNama: ${it.editorName}\nNo Telp: ${it.editorPhone ?: "-"}"
+        }
+        
+        return text
     }
 
     private fun shareData(it: Kendaraan) {
