@@ -141,6 +141,15 @@
                         android:textSize="14sp" />
 
                     <TextView
+                        android:id="@+id/tvActiveUntil"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Aktif Sampai: -"
+                        android:textColor="@color/gray_text"
+                        android:textSize="13sp" />
+
+                    <TextView
                         android:id="@+id/tvUpdateTerakhir"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

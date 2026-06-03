@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         observeStats()
         
         performSearch("")
-        checkAndInsertDummyData()
+        // checkAndInsertDummyData()
     }
 
     override fun onStart() {
