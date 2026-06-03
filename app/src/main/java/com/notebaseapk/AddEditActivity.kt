@@ -4,15 +4,21 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.notebaseapk.data.AppDatabase
 import com.notebaseapk.data.Kendaraan
 import com.notebaseapk.databinding.ActivityAddEditBinding
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.Locale
 
 class AddEditActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddEditBinding
     private lateinit var db: AppDatabase
+    private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
     private var vehicleId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,20 +66,49 @@ class AddEditActivity : AppCompatActivity() {
         val saldo = binding.etSaldo.text.toString().trim()
         val ovd = binding.etOverdue.text.toString().trim()
         val catatan = binding.etCatatan.text.toString().trim()
+        val isPublish = binding.rbPublish.isChecked
 
         if (nopol.isEmpty() || nama.isEmpty()) {
             Toast.makeText(this, "Nopol dan Nama wajib diisi", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Menampilkan Toast sesuai visibilitas yang dipilih
-        val mode = if (binding.rbPublish.isChecked) "Publish" else "Privat"
-        Toast.makeText(this, "Mode data: $mode", Toast.LENGTH_SHORT).show()
-
-        val groupNumber = extractGroup(nopol)
-        val searchKey = generateSearchKey(nopol, nama, tahun, warna, leasing, saldo, ovd, catatan)
-
         lifecycleScope.launch {
+            var publisherName: String? = null
+            var publisherPhone: String? = null
+            var publisherEmail: String? = null
+
+            if (isPublish) {
+                val user = auth.currentUser
+                if (user == null) {
+                    Toast.makeText(this@AddEditActivity, "Silakan login terlebih dahulu untuk publish data", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                try {
+                    val userDoc = firestore.collection("users").document(user.uid).get().await()
+                    if (userDoc.exists()) {
+                        publisherName = userDoc.getString("name")
+                        publisherPhone = userDoc.getString("phone")
+                        publisherEmail = userDoc.getString("email")
+
+                        if (publisherName.isNullOrEmpty() || publisherPhone.isNullOrEmpty()) {
+                            Toast.makeText(this@AddEditActivity, "Lengkapi profil terlebih dahulu sebelum publish data", Toast.LENGTH_SHORT).show()
+                            return@launch
+                        }
+                    } else {
+                        Toast.makeText(this@AddEditActivity, "Data profil tidak ditemukan", Toast.LENGTH_SHORT).show()
+                        return@launch
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this@AddEditActivity, "Gagal mengambil profil: ${e.message}", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+            }
+
+            val groupNumber = extractGroup(nopol)
+            val searchKey = generateSearchKey(nopol, nama, tahun, warna, leasing, saldo, ovd, catatan)
+
             val kendaraan = Kendaraan(
                 id = if (vehicleId == -1) 0 else vehicleId,
                 nopol = nopol,
@@ -87,14 +122,49 @@ class AddEditActivity : AppCompatActivity() {
                 saldo = saldo,
                 overdue = ovd,
                 catatan = catatan,
-                searchKey = searchKey
+                searchKey = searchKey,
+                editorName = publisherName,
+                editorPhone = publisherPhone
             )
 
+            // Simpan Lokal
             if (vehicleId == -1) {
                 db.kendaraanDao().insert(kendaraan)
             } else {
                 db.kendaraanDao().update(kendaraan)
             }
+
+            // Simpan ke Firestore jika Publish
+            if (isPublish) {
+                val publicData = hashMapOf(
+                    "nopol" to nopol,
+                    "namaKendaraan" to nama,
+                    "tahun" to tahun,
+                    "warna" to warna,
+                    "noRangka" to rangka,
+                    "noMesin" to mesin,
+                    "leasing" to leasing,
+                    "saldo" to saldo,
+                    "overdue" to ovd,
+                    "catatan" to catatan,
+                    "publisherUid" to auth.currentUser?.uid,
+                    "publisherName" to publisherName,
+                    "publisherPhone" to publisherPhone,
+                    "publisherEmail" to publisherEmail,
+                    "status" to "approved",
+                    "createdAt" to FieldValue.serverTimestamp()
+                )
+
+                try {
+                    firestore.collection("public_vehicles").add(publicData).await()
+                    Toast.makeText(this@AddEditActivity, "Data berhasil dipublish", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    Toast.makeText(this@AddEditActivity, "Gagal publish ke Firestore: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this@AddEditActivity, "Data disimpan secara privat", Toast.LENGTH_SHORT).show()
+            }
+
             finish()
         }
     }
