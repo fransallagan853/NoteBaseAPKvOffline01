@@ -48,6 +48,7 @@ class AddEditActivity : AppCompatActivity() {
                 binding.etNoRangka.setText(it.noRangka)
                 binding.etNoMesin.setText(it.noMesin)
                 binding.etLeasing.setText(it.leasing)
+                binding.etCabang.setText(it.cabang)
                 binding.etSaldo.setText(it.saldo)
                 binding.etOverdue.setText(it.overdue)
                 binding.etCatatan.setText(it.catatan)
@@ -63,6 +64,7 @@ class AddEditActivity : AppCompatActivity() {
         val rangka = binding.etNoRangka.text.toString().trim().uppercase(Locale.getDefault())
         val mesin = binding.etNoMesin.text.toString().trim().uppercase(Locale.getDefault())
         val leasing = binding.etLeasing.text.toString().trim().uppercase(Locale.getDefault())
+        val cabang = binding.etCabang.text.toString().trim().uppercase(Locale.getDefault())
         val saldo = binding.etSaldo.text.toString().trim()
         val ovd = binding.etOverdue.text.toString().trim()
         val catatan = binding.etCatatan.text.toString().trim()
@@ -107,7 +109,7 @@ class AddEditActivity : AppCompatActivity() {
             }
 
             val groupNumber = extractGroup(nopol)
-            val searchKey = generateSearchKey(nopol, nama, tahun, warna, leasing, saldo, ovd, catatan)
+            val searchKey = generateSearchKey(nopol, nama, tahun, warna, leasing, cabang, saldo, ovd, catatan)
 
             val kendaraan = Kendaraan(
                 id = if (vehicleId == -1) 0 else vehicleId,
@@ -119,6 +121,7 @@ class AddEditActivity : AppCompatActivity() {
                 noRangka = rangka,
                 noMesin = mesin,
                 leasing = leasing,
+                cabang = cabang,
                 saldo = saldo,
                 overdue = ovd,
                 catatan = catatan,
@@ -144,6 +147,7 @@ class AddEditActivity : AppCompatActivity() {
                     "noRangka" to rangka,
                     "noMesin" to mesin,
                     "leasing" to leasing,
+                    "cabang" to cabang,
                     "saldo" to saldo,
                     "overdue" to ovd,
                     "catatan" to catatan,

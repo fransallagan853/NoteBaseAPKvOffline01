@@ -26,6 +26,9 @@ interface KendaraanDao {
     @Query("SELECT * FROM kendaraan WHERE nopol = :nopol AND leasing = :leasing LIMIT 1")
     suspend fun getKendaraanByNopolAndLeasing(nopol: String, leasing: String): Kendaraan?
 
+    @Query("SELECT * FROM kendaraan WHERE nopol = :nopol AND leasing = :leasing AND cabang = :cabang LIMIT 1")
+    suspend fun getKendaraanByNopolLeasingCabang(nopol: String, leasing: String, cabang: String): Kendaraan?
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(kendaraan: Kendaraan): Long
 

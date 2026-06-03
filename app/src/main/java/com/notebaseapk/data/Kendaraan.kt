@@ -18,6 +18,7 @@ data class Kendaraan(
     val noRangka: String = "",
     val noMesin: String = "",
     val leasing: String,
+    val cabang: String = "",
     val saldo: String = "",
     val overdue: String = "",
     var catatan: String,

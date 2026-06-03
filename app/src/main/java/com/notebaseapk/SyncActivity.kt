@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.notebaseapk.data.AppDatabase
 import com.notebaseapk.data.Kendaraan
@@ -27,7 +28,6 @@ class SyncActivity : AppCompatActivity() {
     private lateinit var dbRoom: AppDatabase
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
-    private var isSubscribed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +47,6 @@ class SyncActivity : AppCompatActivity() {
             if (user == null) {
                 Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show()
             } else {
-                // Re-check subscription status before sync
                 checkSubscriptionAndSync(user.uid)
             }
         }
@@ -92,27 +91,22 @@ class SyncActivity : AppCompatActivity() {
                         val now = Timestamp.now()
 
                         if (subStatus == "active" && activeUntil != null && activeUntil.seconds > now.seconds) {
-                            isSubscribed = true
                             binding.tvStatusSub.text = "Status Langganan: Aktif"
                             binding.tvActiveUntil.text = "Aktif Sampai: ${dateFormat.format(activeUntil.toDate())}"
                         } else if (subStatus == "active" && activeUntil != null && activeUntil.seconds <= now.seconds) {
-                            isSubscribed = false
                             binding.tvStatusSub.text = "Status Langganan: Expired"
                             binding.tvActiveUntil.text = "Aktif Sampai: ${dateFormat.format(activeUntil.toDate())}"
                         } else {
-                            isSubscribed = false
                             binding.tvStatusSub.text = "Status Langganan: Belum aktif"
                             binding.tvActiveUntil.text = "Aktif Sampai: -"
                         }
                     } else {
-                        isSubscribed = false
                         binding.tvStatusAkun.text = "Status Akun: ${user.displayName ?: "User"}"
                         binding.tvStatusSub.text = "Status Langganan: Belum aktif"
                         binding.tvActiveUntil.text = "Aktif Sampai: -"
                     }
                 }
         } else {
-            isSubscribed = false
             binding.btnLoginAction.visibility = View.VISIBLE
             binding.layoutAccountInfo.visibility = View.GONE
             binding.tvStatusAkun.text = "Status Akun: Belum login"
@@ -130,10 +124,8 @@ class SyncActivity : AppCompatActivity() {
                 val now = Timestamp.now()
 
                 if (subStatus == "active" && activeUntil != null && activeUntil.seconds > now.seconds) {
-                    isSubscribed = true
                     startDataSync()
                 } else {
-                    isSubscribed = false
                     Toast.makeText(this@SyncActivity, "Langganan belum aktif. Hubungi admin untuk aktivasi.", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
@@ -147,97 +139,127 @@ class SyncActivity : AppCompatActivity() {
         
         lifecycleScope.launch {
             try {
-                var updateCount = 0
-                val affectedNopolLeasing = mutableSetOf<String>()
+                var adminCount = 0
+                var publicCount = 0
+                var noteCount = 0
 
-                // 1. Sync public_vehicles
-                val vehicleSnapshot = firestore.collection("public_vehicles")
+                // 1. Sync admin_vehicles
+                val adminSnapshot = firestore.collection("admin_vehicles")
                     .whereEqualTo("status", "approved")
                     .get().await()
                 
-                for (doc in vehicleSnapshot.documents) {
-                    val nopol = doc.getString("nopol") ?: continue
-                    val leasing = doc.getString("leasing") ?: continue
-                    
-                    val existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
-                    
-                    val nama = doc.getString("namaKendaraan") ?: ""
-                    val tahun = doc.getString("tahun") ?: ""
-                    val warna = doc.getString("warna") ?: ""
-                    val rangka = doc.getString("noRangka") ?: ""
-                    val mesin = doc.getString("noMesin") ?: ""
-                    val saldo = doc.getString("saldo") ?: ""
-                    val ovd = doc.getString("overdue") ?: ""
-                    val catatan = doc.getString("catatan") ?: ""
-                    val pName = doc.getString("publisherName")
-                    val pPhone = doc.getString("publisherPhone")
-
-                    val groupNumber = extractGroup(nopol)
-                    val searchKey = generateSearchKey(nopol, nama, tahun, warna, leasing, saldo, ovd, catatan)
-
-                    val k = Kendaraan(
-                        id = existing?.id ?: 0,
-                        nopol = nopol,
-                        groupNumber = groupNumber,
-                        namaKendaraan = nama,
-                        tahun = tahun,
-                        warna = warna,
-                        noRangka = rangka,
-                        noMesin = mesin,
-                        leasing = leasing,
-                        saldo = saldo,
-                        overdue = ovd,
-                        catatan = catatan,
-                        searchKey = searchKey,
-                        editorName = pName,
-                        editorPhone = pPhone
-                    )
-
-                    if (existing == null) {
-                        dbRoom.kendaraanDao().insert(k)
-                    } else {
-                        dbRoom.kendaraanDao().update(k)
-                    }
-                    affectedNopolLeasing.add("$nopol|$leasing")
+                for (doc in adminSnapshot.documents) {
+                    if (upsertVehicle(doc)) adminCount++
                 }
 
-                // 2. Sync public_vehicle_notes
+                // 2. Sync public_vehicles
+                val publicSnapshot = firestore.collection("public_vehicles")
+                    .whereEqualTo("status", "approved")
+                    .get().await()
+                
+                for (doc in publicSnapshot.documents) {
+                    if (upsertVehicle(doc)) publicCount++
+                }
+
+                // 3. Sync public_vehicle_notes
                 val noteSnapshot = firestore.collection("public_vehicle_notes")
                     .whereEqualTo("status", "approved")
                     .get().await()
 
                 for (doc in noteSnapshot.documents) {
-                    val nopol = doc.getString("nopol") ?: continue
-                    val leasing = doc.getString("leasing") ?: continue
-                    val noteText = doc.getString("noteText") ?: continue
-                    val editorName = doc.getString("editorName")
-                    val editorPhone = doc.getString("editorPhone")
-
-                    val existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
-                    if (existing != null) {
-                        val updated = existing.copy(
-                            catatan = noteText,
-                            editorName = editorName,
-                            editorPhone = editorPhone
-                        )
-                        dbRoom.kendaraanDao().update(updated)
-                        affectedNopolLeasing.add("$nopol|$leasing")
-                    }
+                    if (updateNote(doc)) noteCount++
                 }
 
-                updateCount = affectedNopolLeasing.size
-
-                if (updateCount > 0) {
-                    Toast.makeText(this@SyncActivity, "Sinkron selesai: $updateCount data diperbarui", Toast.LENGTH_SHORT).show()
-                    saveSyncTime()
-                } else {
-                    Toast.makeText(this@SyncActivity, "Tidak ada update baru", Toast.LENGTH_SHORT).show()
-                }
+                Toast.makeText(this@SyncActivity, 
+                    "Sinkron selesai: $adminCount data admin, $publicCount data public, $noteCount catatan diperbarui", 
+                    Toast.LENGTH_LONG).show()
+                
+                saveSyncTime()
 
             } catch (e: Exception) {
                 Toast.makeText(this@SyncActivity, "Gagal sinkron: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private suspend fun upsertVehicle(doc: DocumentSnapshot): Boolean {
+        val nopol = doc.getString("nopol") ?: return false
+        val leasing = doc.getString("leasing") ?: return false
+        val cabang = doc.getString("cabang") ?: ""
+        
+        // Cek data lama berdasarkan nopol + leasing (Room Unique Constraint)
+        val existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
+        
+        val nama = doc.getString("namaKendaraan") ?: ""
+        val groupNumber = doc.getString("groupNumber") ?: extractGroup(nopol)
+        val tahun = doc.getString("tahun") ?: ""
+        val warna = doc.getString("warna") ?: ""
+        val rangka = doc.getString("noRangka") ?: ""
+        val mesin = doc.getString("noMesin") ?: ""
+        val saldo = doc.getString("saldo") ?: ""
+        val overdue = doc.getString("overdue") ?: ""
+        val catatan = doc.getString("catatan") ?: ""
+        
+        // Metadata publisher (untuk public_vehicles)
+        val pName = doc.getString("publisherName")
+        val pPhone = doc.getString("publisherPhone")
+
+        val searchKey = doc.getString("searchKey") ?: generateSearchKey(nopol, nama, leasing, cabang)
+
+        val k = Kendaraan(
+            id = existing?.id ?: 0,
+            nopol = nopol,
+            groupNumber = groupNumber,
+            namaKendaraan = nama,
+            tahun = tahun,
+            warna = warna,
+            noRangka = rangka,
+            noMesin = mesin,
+            leasing = leasing,
+            cabang = cabang,
+            saldo = saldo,
+            overdue = overdue,
+            catatan = catatan,
+            searchKey = searchKey,
+            editorName = pName ?: existing?.editorName,
+            editorPhone = pPhone ?: existing?.editorPhone
+        )
+
+        if (existing == null) {
+            dbRoom.kendaraanDao().insert(k)
+        } else {
+            dbRoom.kendaraanDao().update(k)
+        }
+        return true
+    }
+
+    private suspend fun updateNote(doc: DocumentSnapshot): Boolean {
+        val nopol = doc.getString("nopol") ?: return false
+        val leasing = doc.getString("leasing") ?: return false
+        val cabang = doc.getString("cabang") ?: ""
+        
+        // Cari kendaraan lokal berdasarkan nopol + leasing + cabang (jika ada)
+        var existing = dbRoom.kendaraanDao().getKendaraanByNopolLeasingCabang(nopol, leasing, cabang)
+        if (existing == null) {
+            // Fallback ke nopol + leasing
+            existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
+        }
+
+        if (existing != null) {
+            val noteText = doc.getString("noteText") ?: return false
+            val editorName = doc.getString("editorName")
+            val editorPhone = doc.getString("editorPhone")
+            // editorEmail diabaikan karena tidak ada di Entity Kendaraan
+
+            val updated = existing.copy(
+                catatan = noteText,
+                editorName = editorName ?: existing.editorName,
+                editorPhone = editorPhone ?: existing.editorPhone
+            )
+            dbRoom.kendaraanDao().update(updated)
+            return true
+        }
+        return false
     }
 
     private fun extractGroup(nopol: String): String {

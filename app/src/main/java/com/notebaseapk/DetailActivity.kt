@@ -46,6 +46,7 @@ class DetailActivity : AppCompatActivity() {
                 binding.tvNoRangka.text = it.noRangka.ifEmpty { "-" }
                 binding.tvNoMesin.text = it.noMesin.ifEmpty { "-" }
                 binding.tvLeasing.text = it.leasing
+                binding.tvCabang.text = it.cabang.ifEmpty { "-" }
                 binding.tvSaldo.text = it.saldo.ifEmpty { "-" }
                 binding.tvOverdue.text = it.overdue.ifEmpty { "-" }
                 binding.tvCatatan.text = it.catatan.ifEmpty { "Tidak ada catatan" }
@@ -91,9 +92,10 @@ class DetailActivity : AppCompatActivity() {
             Kendaraan: ${it.namaKendaraan}
             Tahun: ${it.tahun.ifEmpty { "-" }}
             Warna: ${it.warna.ifEmpty { "-" }}
+            Leasing: ${it.leasing}
+            Cabang: ${it.cabang.ifEmpty { "-" }}
             No Rangka: ${it.noRangka.ifEmpty { "-" }}
             No Mesin: ${it.noMesin.ifEmpty { "-" }}
-            Leasing: ${it.leasing}
             Saldo: ${it.saldo.ifEmpty { "-" }}
             Overdue/OVD: ${it.overdue.ifEmpty { "-" }}
             Catatan: ${it.catatan.ifEmpty { "-" }}
