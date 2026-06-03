@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black_bg">
 
+    <!-- Header Section with Safe Area -->
     <LinearLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
-        android:paddingTop="20dp"
-        android:layout_marginTop="36dp"
+        android:paddingTop="52dp"
         android:paddingBottom="10dp"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -22,11 +23,12 @@
 
             <ImageView
                 android:id="@+id/btnBack"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_centerVertical="true"
-                android:padding="4dp"
+                android:padding="6dp"
                 android:src="@android:drawable/ic_menu_revert"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 app:tint="@color/white_text" />
 
             <TextView
@@ -43,6 +45,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
         app:layout_constraintBottom_toTopOf="@id/btnSave"
         app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
@@ -55,81 +59,115 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tampilan Keyboard"
+                android:text="Pilih Tata Letak"
                 android:textColor="@color/cyan_accent"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textAllCaps="true" />
+                android:textAllCaps="true"
+                android:letterSpacing="0.05" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Pilih layout keyboard untuk pencarian utama"
+                android:text="Sesuaikan posisi tombol angka dan huruf sesuai kenyamanan Anda."
                 android:textColor="@color/gray_text"
                 android:textSize="14sp" />
 
-            <RadioGroup
-                android:id="@+id/rgKeyboardLayout"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/charcoal_bg"
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="0dp"
+                app:cardElevation="2dp">
 
-                <RadioButton
-                    android:id="@+id/rbDefault"
+                <RadioGroup
+                    android:id="@+id/rgKeyboardLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="Default noteBase"
-                    android:textColor="@color/white_text"
-                    android:buttonTint="@color/cyan_accent" />
+                    android:layout_height="wrap_content"
+                    android:padding="8dp">
 
-                <RadioButton
-                    android:id="@+id/rbQwertyNumpad"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="QWERTY + Numpad"
-                    android:textColor="@color/white_text"
-                    android:buttonTint="@color/cyan_accent" />
+                    <RadioButton
+                        android:id="@+id/rbDefault"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:text="Default noteBase"
+                        android:textColor="@color/white_text"
+                        android:buttonTint="@color/cyan_accent"
+                        android:textSize="15sp"
+                        android:paddingStart="12dp" />
 
-                <RadioButton
-                    android:id="@+id/rbNumpadTop"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="Numpad Atas"
-                    android:textColor="@color/white_text"
-                    android:buttonTint="@color/cyan_accent" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_color" android:layout_marginHorizontal="12dp"/>
 
-                <RadioButton
-                    android:id="@+id/rbNumpadBottom"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="Numpad Bawah"
-                    android:textColor="@color/white_text"
-                    android:buttonTint="@color/cyan_accent" />
+                    <RadioButton
+                        android:id="@+id/rbQwertyNumpad"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:text="QWERTY + Numpad"
+                        android:textColor="@color/white_text"
+                        android:buttonTint="@color/cyan_accent"
+                        android:textSize="15sp"
+                        android:paddingStart="12dp" />
 
-                <RadioButton
-                    android:id="@+id/rbCustomManual"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="Custom Manual"
-                    android:textColor="@color/white_text"
-                    android:buttonTint="@color/cyan_accent" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_color" android:layout_marginHorizontal="12dp"/>
 
-            </RadioGroup>
+                    <RadioButton
+                        android:id="@+id/rbNumpadTop"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:text="Numpad Atas"
+                        android:textColor="@color/white_text"
+                        android:buttonTint="@color/cyan_accent"
+                        android:textSize="15sp"
+                        android:paddingStart="12dp" />
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_color" android:layout_marginHorizontal="12dp"/>
+
+                    <RadioButton
+                        android:id="@+id/rbNumpadBottom"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:text="Numpad Bawah"
+                        android:textColor="@color/white_text"
+                        android:buttonTint="@color/cyan_accent"
+                        android:textSize="15sp"
+                        android:paddingStart="12dp" />
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_color" android:layout_marginHorizontal="12dp"/>
+
+                    <RadioButton
+                        android:id="@+id/rbCustomManual"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:text="Custom Manual"
+                        android:textColor="@color/white_text"
+                        android:buttonTint="@color/cyan_accent"
+                        android:textSize="15sp"
+                        android:paddingStart="12dp" />
+
+                </RadioGroup>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSave"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_margin="16dp"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
         android:text="Simpan Perubahan"
         android:textColor="@color/black_bg"
         android:textStyle="bold"
         app:backgroundTint="@color/cyan_accent"
         app:cornerRadius="12dp"
+        app:elevation="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

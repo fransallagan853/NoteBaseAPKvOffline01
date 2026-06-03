@@ -12,6 +12,9 @@ import com.notebaseapk.data.AppDatabase
 import com.notebaseapk.databinding.ActivitySettingsBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.constraintlayout.widget.ConstraintLayout
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
@@ -24,6 +27,8 @@ class SettingsActivity : AppCompatActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupSafeBottomNav()
+
         db = AppDatabase.getDatabase(this)
 
         binding.btnBack.setOnClickListener { finish() }
@@ -34,11 +39,21 @@ class SettingsActivity : AppCompatActivity() {
         updateUserUI()
     }
 
+    private fun setupSafeBottomNav() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val params = view.layoutParams as ConstraintLayout.LayoutParams
+            params.bottomMargin = navBarHeight
+            view.layoutParams = params
+            insets
+        }
+    }
+
     private fun updateUserUI() {
         val user = auth.currentUser
         if (user != null) {
             binding.btnLogin.visibility = View.GONE
-            binding.layoutUserInfo.visibility = View.VISIBLE
+            binding.cardUserInfo.visibility = View.VISIBLE
             
             firestore.collection("users").document(user.uid).get()
                 .addOnSuccessListener { doc ->
@@ -52,7 +67,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
         } else {
             binding.btnLogin.visibility = View.VISIBLE
-            binding.layoutUserInfo.visibility = View.GONE
+            binding.cardUserInfo.visibility = View.GONE
         }
     }
 

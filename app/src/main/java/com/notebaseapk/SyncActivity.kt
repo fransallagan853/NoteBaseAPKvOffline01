@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.notebaseapk.databinding.ActivitySyncBinding
@@ -19,6 +22,8 @@ class SyncActivity : AppCompatActivity() {
         binding = ActivitySyncBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupSafeBottomNav()
+
         binding.btnBack.setOnClickListener { finish() }
 
         updateUI()
@@ -28,7 +33,7 @@ class SyncActivity : AppCompatActivity() {
             if (user == null) {
                 Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Langganan belum aktif", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Fitur sinkron online akan tersedia pada versi berikutnya", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -37,6 +42,16 @@ class SyncActivity : AppCompatActivity() {
         }
 
         setupBottomNav()
+    }
+
+    private fun setupSafeBottomNav() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val params = view.layoutParams as ConstraintLayout.LayoutParams
+            params.bottomMargin = navBarHeight
+            view.layoutParams = params
+            insets
+        }
     }
 
     private fun updateUI() {

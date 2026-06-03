@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/black_bg">
 
-    <!-- Header Section with Safe Area -->
+    <!-- Header Section -->
     <LinearLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
@@ -23,13 +23,13 @@
 
             <ImageView
                 android:id="@+id/btnBack"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_centerVertical="true"
-                android:padding="4dp"
+                android:padding="6dp"
                 android:src="@android:drawable/ic_menu_revert"
-                app:tint="@color/white_text"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/white_text" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -40,21 +40,13 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
         </RelativeLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:text="Update data terbaru dari pusat noteBase"
-            android:textColor="@color/gray_text"
-            android:textSize="13sp" />
     </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
+        android:paddingBottom="20dp"
         app:layout_constraintBottom_toTopOf="@id/bottomNav"
         app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
@@ -64,84 +56,100 @@
             android:orientation="vertical"
             android:padding="20dp">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Update data terbaru dari pusat noteBase"
+                android:textColor="@color/gray_text"
+                android:textSize="13sp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="24dp"/>
+
             <!-- Account Status Card -->
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardAccount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_item_rounded"
-                android:backgroundTint="@color/charcoal_bg"
-                android:orientation="vertical"
-                android:padding="20dp"
-                android:elevation="2dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Informasi Akun"
-                    android:textColor="@color/cyan_accent"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textAllCaps="true" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginVertical="12dp"
-                    android:background="@color/divider_color" />
-
-                <TextView
-                    android:id="@+id/tvStatusAkun"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Status Akun: Belum login"
-                    android:textColor="@color/white_text"
-                    android:textSize="14sp" />
+                app:cardBackgroundColor="@color/charcoal_bg"
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="0dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
-                    android:id="@+id/layoutAccountInfo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone">
+                    android:padding="20dp">
 
                     <TextView
-                        android:id="@+id/tvUserEmail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Informasi Akun"
+                        android:textColor="@color/cyan_accent"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="true"
+                        android:letterSpacing="0.05" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="12dp"
+                        android:background="@color/divider_color" />
+
+                    <TextView
+                        android:id="@+id/tvStatusAkun"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Status Akun: Belum login"
+                        android:textColor="@color/white_text"
+                        android:textSize="14sp" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutAccountInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/tvUserEmail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Gmail: -"
+                            android:textColor="@color/gray_text"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/tvUserPhone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="No Telepon: -"
+                            android:textColor="@color/gray_text"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvStatusSub"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Gmail: -"
-                        android:textColor="@color/gray_text"
-                        android:textSize="13sp" />
+                        android:text="Status Langganan: Belum aktif"
+                        android:textColor="@color/white_text"
+                        android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/tvUserPhone"
+                        android:id="@+id/tvUpdateTerakhir"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="No Telepon: -"
+                        android:layout_marginTop="12dp"
+                        android:text="Update Terakhir: -"
                         android:textColor="@color/gray_text"
-                        android:textSize="13sp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvStatusSub"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Status Langganan: Belum aktif"
-                    android:textColor="@color/white_text"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/tvUpdateTerakhir"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="Update Terakhir: -"
-                    android:textColor="@color/gray_text"
-                    android:textSize="12sp" />
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLoginAction"
@@ -169,7 +177,8 @@
                 app:icon="@drawable/ic_sync"
                 app:iconGravity="textStart"
                 app:iconTint="@color/black_bg"
-                app:iconPadding="8dp" />
+                app:iconPadding="8dp"
+                app:elevation="4dp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -209,7 +218,6 @@
                 android:src="@drawable/ic_home"
                 app:tint="@color/gray_text" />
             <TextView
-                android:id="@+id/tvHome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -234,7 +242,6 @@
                 android:src="@drawable/ic_sync"
                 app:tint="@color/cyan_accent" />
             <TextView
-                android:id="@+id/tvSync"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -260,7 +267,6 @@
                 android:src="@drawable/ic_settings"
                 app:tint="@color/gray_text" />
             <TextView
-                android:id="@+id/tvSettings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
