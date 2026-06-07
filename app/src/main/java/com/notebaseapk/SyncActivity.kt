@@ -138,7 +138,6 @@ class SyncActivity : AppCompatActivity() {
                 val now = Timestamp.now()
 
                 if (subStatus == "active" && activeUntil != null && activeUntil.seconds > now.seconds) {
-                    // Tahap 1: Cek metadata server
                     checkServerUpdate()
                 } else {
                     Toast.makeText(
@@ -184,7 +183,6 @@ class SyncActivity : AppCompatActivity() {
                 return
             }
 
-            // Pengecekan Version Code untuk Efisiensi
             val prefs = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
             val lastImportedVersion = prefs.getLong("last_server_version_code", 0L)
 
@@ -195,7 +193,6 @@ class SyncActivity : AppCompatActivity() {
                 return
             }
 
-            // Lanjut ke tahap download dan extract dengan membawa versionCode baru
             downloadAndExtractUpdate(gzipFile, totalRows, versionCode)
 
         } catch (e: Exception) {
@@ -209,21 +206,19 @@ class SyncActivity : AppCompatActivity() {
     private suspend fun downloadAndExtractUpdate(gzipFile: String, totalRows: Int, versionCode: Long) {
         withContext(Dispatchers.IO) {
             try {
-                // 1. Persiapkan folder internal (filesDir/updates)
                 val updatesDir = File(filesDir, "updates")
                 if (!updatesDir.exists()) updatesDir.mkdirs()
 
                 val gzippedFile = File(updatesDir, gzipFile)
                 val extractedFile = File(updatesDir, "notebase_update.sqlite")
 
-                // 2. Download file .gz dari server
                 val request = Request.Builder()
                     .url("http://192.168.18.34:5000/api/update/download/$gzipFile")
                     .build()
 
                 okHttpClient.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) throw Exception("Gagal download: ${response.code}")
-
+                    
                     val body = response.body ?: throw Exception("Isi file kosong")
                     body.byteStream().use { input ->
                         FileOutputStream(gzippedFile).use { output ->
@@ -232,7 +227,6 @@ class SyncActivity : AppCompatActivity() {
                     }
                 }
 
-                // 3. Extract Gzip menjadi file SQLite mentah
                 FileInputStream(gzippedFile).use { fis ->
                     GZIPInputStream(fis).use { gzis ->
                         FileOutputStream(extractedFile).use { fos ->
@@ -241,7 +235,6 @@ class SyncActivity : AppCompatActivity() {
                     }
                 }
 
-                // Lanjut Tahap 3: Import ke Room dengan membawa versionCode
                 importSqliteUpdateToRoom(extractedFile, versionCode)
 
             } catch (e: Exception) {
@@ -261,43 +254,62 @@ class SyncActivity : AppCompatActivity() {
 
             try {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@SyncActivity, "Sedang mengimpor data ke database lokal...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SyncActivity, "Sedang mengimpor data...", Toast.LENGTH_SHORT).show()
                 }
+
+                // 1. Ambil data lama ke memori untuk pencocokan cepat (nopol|leasing)
+                // Ini jauh lebih cepat daripada query satu per satu di dalam loop
+                val existingList = dbRoom.kendaraanDao().getAllKendaraanList()
+                val existingMap = existingList.associateBy { "${it.nopol}|${it.leasing}" }
 
                 sqliteDb = SQLiteDatabase.openDatabase(sqliteFile.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
                 cursor = sqliteDb.rawQuery("SELECT * FROM kendaraan_update", null)
 
+                val toInsert = mutableListOf<Kendaraan>()
+                val toUpdate = mutableListOf<Kendaraan>()
+                val batchSize = 5000
+
                 if (cursor != null && cursor.moveToFirst()) {
+                    // Ambil column index sekali saja
+                    val colNopol = cursor.getColumnIndexOrThrow("nopol")
+                    val colLeasing = cursor.getColumnIndexOrThrow("leasing")
+                    val colCabang = cursor.getColumnIndexOrThrow("cabang")
+                    val colNama = cursor.getColumnIndexOrThrow("namaKendaraan")
+                    val colGroup = cursor.getColumnIndexOrThrow("groupNumber")
+                    val colTahun = cursor.getColumnIndexOrThrow("tahun")
+                    val colWarna = cursor.getColumnIndexOrThrow("warna")
+                    val colRangka = cursor.getColumnIndexOrThrow("noRangka")
+                    val colMesin = cursor.getColumnIndexOrThrow("noMesin")
+                    val colSaldo = cursor.getColumnIndexOrThrow("saldo")
+                    val colOverdue = cursor.getColumnIndexOrThrow("overdue")
+                    val colCatatan = cursor.getColumnIndexOrThrow("catatan")
+                    val colSearchKey = cursor.getColumnIndexOrThrow("searchKey")
+
                     do {
-                        val nopol = cursor.getString(cursor.getColumnIndexOrThrow("nopol")) ?: ""
+                        val nopol = cursor.getString(colNopol) ?: ""
                         if (nopol.isBlank()) continue
 
-                        val leasing = cursor.getString(cursor.getColumnIndexOrThrow("leasing")) ?: ""
-                        val cabang = cursor.getString(cursor.getColumnIndexOrThrow("cabang")) ?: ""
+                        val leasing = cursor.getString(colLeasing) ?: ""
+                        val cabang = cursor.getString(colCabang) ?: ""
 
-                        // Cek data lama di Room menggunakan nopol + leasing + cabang
-                        var existing = dbRoom.kendaraanDao().getKendaraanByNopolLeasingCabang(nopol, leasing, cabang)
-                        if (existing == null) {
-                            // Fallback ke nopol + leasing
-                            existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
-                        }
+                        // Pencocokan cepat via Map
+                        val existing = existingMap["$nopol|$leasing"]
 
-                        val nama = cursor.getString(cursor.getColumnIndexOrThrow("namaKendaraan")) ?: ""
-                        val groupNumber = cursor.getString(cursor.getColumnIndexOrThrow("groupNumber")) ?: extractGroup(nopol)
-                        val tahun = cursor.getString(cursor.getColumnIndexOrThrow("tahun")) ?: ""
-                        val warna = cursor.getString(cursor.getColumnIndexOrThrow("warna")) ?: ""
-                        val rangka = cursor.getString(cursor.getColumnIndexOrThrow("noRangka")) ?: ""
-                        val mesin = cursor.getString(cursor.getColumnIndexOrThrow("noMesin")) ?: ""
-                        val saldo = cursor.getString(cursor.getColumnIndexOrThrow("saldo")) ?: ""
-                        val overdue = cursor.getString(cursor.getColumnIndexOrThrow("overdue")) ?: ""
-                        val catatan = cursor.getString(cursor.getColumnIndexOrThrow("catatan")) ?: ""
-                        var searchKey = cursor.getString(cursor.getColumnIndexOrThrow("searchKey")) ?: ""
+                        val nama = cursor.getString(colNama) ?: ""
+                        val groupNumber = cursor.getString(colGroup) ?: extractGroup(nopol)
+                        val tahun = cursor.getString(colTahun) ?: ""
+                        val warna = cursor.getString(colWarna) ?: ""
+                        val rangka = cursor.getString(colRangka) ?: ""
+                        val mesin = cursor.getString(colMesin) ?: ""
+                        val saldo = cursor.getString(colSaldo) ?: ""
+                        val overdue = cursor.getString(colOverdue) ?: ""
+                        val catatan = cursor.getString(colCatatan) ?: ""
+                        var searchKey = cursor.getString(colSearchKey) ?: ""
 
                         if (searchKey.isBlank()) {
                             searchKey = generateSearchKey(nopol, nama, leasing, cabang)
                         }
 
-                        // Buat objek Kendaraan baru
                         val k = Kendaraan(
                             id = existing?.id ?: 0,
                             nopol = nopol,
@@ -318,19 +330,30 @@ class SyncActivity : AppCompatActivity() {
                         )
 
                         if (existing == null) {
-                            dbRoom.kendaraanDao().insert(k)
+                            toInsert.add(k)
                         } else {
-                            dbRoom.kendaraanDao().update(k)
+                            toUpdate.add(k)
                         }
                         importCount++
+
+                        // Eksekusi batch jika sudah mencapai batchSize
+                        if (toInsert.size + toUpdate.size >= batchSize) {
+                            dbRoom.kendaraanDao().importData(toInsert, toUpdate)
+                            toInsert.clear()
+                            toUpdate.clear()
+                        }
 
                     } while (cursor.moveToNext())
                 }
 
+                // Masukkan sisa data yang belum terproses
+                if (toInsert.isNotEmpty() || toUpdate.isNotEmpty()) {
+                    dbRoom.kendaraanDao().importData(toInsert, toUpdate)
+                }
+
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@SyncActivity, "Import selesai: $importCount data masuk", Toast.LENGTH_LONG).show()
-
-                    // Simpan versionCode yang baru saja berhasil diimport ke SharedPreferences
+                    
                     val prefs = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
                     prefs.edit().putLong("last_server_version_code", versionCode).apply()
 
@@ -351,46 +374,19 @@ class SyncActivity : AppCompatActivity() {
 
     private fun startDataSync() {
         Toast.makeText(this, "Sedang sinkron data Firebase...", Toast.LENGTH_SHORT).show()
-
         lifecycleScope.launch {
             try {
                 var adminCount = 0
                 var publicCount = 0
                 var noteCount = 0
-
-                // 1. Sync admin_vehicles
-                val adminSnapshot = firestore.collection("admin_vehicles")
-                    .whereEqualTo("status", "approved")
-                    .get().await()
-
-                for (doc in adminSnapshot.documents) {
-                    if (upsertVehicle(doc)) adminCount++
-                }
-
-                // 2. Sync public_vehicles
-                val publicSnapshot = firestore.collection("public_vehicles")
-                    .whereEqualTo("status", "approved")
-                    .get().await()
-
-                for (doc in publicSnapshot.documents) {
-                    if (upsertVehicle(doc)) publicCount++
-                }
-
-                // 3. Sync public_vehicle_notes
-                val noteSnapshot = firestore.collection("public_vehicle_notes")
-                    .whereEqualTo("status", "approved")
-                    .get().await()
-
-                for (doc in noteSnapshot.documents) {
-                    if (updateNote(doc)) noteCount++
-                }
-
-                Toast.makeText(this@SyncActivity,
-                    "Sinkron Firebase selesai: $adminCount data admin, $publicCount data public, $noteCount catatan diperbarui",
-                    Toast.LENGTH_LONG).show()
-
+                val adminSnapshot = firestore.collection("admin_vehicles").whereEqualTo("status", "approved").get().await()
+                for (doc in adminSnapshot.documents) { if (upsertVehicle(doc)) adminCount++ }
+                val publicSnapshot = firestore.collection("public_vehicles").whereEqualTo("status", "approved").get().await()
+                for (doc in publicSnapshot.documents) { if (upsertVehicle(doc)) publicCount++ }
+                val noteSnapshot = firestore.collection("public_vehicle_notes").whereEqualTo("status", "approved").get().await()
+                for (doc in noteSnapshot.documents) { if (updateNote(doc)) noteCount++ }
+                Toast.makeText(this@SyncActivity, "Sinkron Firebase selesai", Toast.LENGTH_LONG).show()
                 saveSyncTime()
-
             } catch (e: Exception) {
                 Toast.makeText(this@SyncActivity, "Gagal sinkron Firebase: ${e.message}", Toast.LENGTH_SHORT).show()
             }
@@ -400,51 +396,26 @@ class SyncActivity : AppCompatActivity() {
     private suspend fun upsertVehicle(doc: DocumentSnapshot): Boolean {
         val nopol = doc.getString("nopol") ?: return false
         val leasing = doc.getString("leasing") ?: return false
-        val cabang = doc.getString("cabang") ?: ""
-
-        // Cek data lama berdasarkan nopol + leasing (Room Unique Constraint)
         val existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
-
-        val nama = doc.getString("namaKendaraan") ?: ""
-        val groupNumber = doc.getString("groupNumber") ?: extractGroup(nopol)
-        val tahun = doc.getString("tahun") ?: ""
-        val warna = doc.getString("warna") ?: ""
-        val rangka = doc.getString("noRangka") ?: ""
-        val mesin = doc.getString("noMesin") ?: ""
-        val saldo = doc.getString("saldo") ?: ""
-        val overdue = doc.getString("overdue") ?: ""
-        val catatan = doc.getString("catatan") ?: ""
-
-        // Metadata publisher (untuk public_vehicles)
-        val pName = doc.getString("publisherName")
-        val pPhone = doc.getString("publisherPhone")
-
-        val searchKey = doc.getString("searchKey") ?: generateSearchKey(nopol, nama, leasing, cabang)
-
         val k = Kendaraan(
             id = existing?.id ?: 0,
             nopol = nopol,
-            groupNumber = groupNumber,
-            namaKendaraan = nama,
-            tahun = tahun,
-            warna = warna,
-            noRangka = rangka,
-            noMesin = mesin,
+            groupNumber = doc.getString("groupNumber") ?: extractGroup(nopol),
+            namaKendaraan = doc.getString("namaKendaraan") ?: "",
+            tahun = doc.getString("tahun") ?: "",
+            warna = doc.getString("warna") ?: "",
+            noRangka = doc.getString("noRangka") ?: "",
+            noMesin = doc.getString("noMesin") ?: "",
             leasing = leasing,
-            cabang = cabang,
-            saldo = saldo,
-            overdue = overdue,
-            catatan = catatan,
-            searchKey = searchKey,
-            editorName = pName ?: existing?.editorName,
-            editorPhone = pPhone ?: existing?.editorPhone
+            cabang = doc.getString("cabang") ?: "",
+            saldo = doc.getString("saldo") ?: "",
+            overdue = doc.getString("overdue") ?: "",
+            catatan = doc.getString("catatan") ?: "",
+            searchKey = doc.getString("searchKey") ?: generateSearchKey(nopol, doc.getString("namaKendaraan") ?: "", leasing, doc.getString("cabang") ?: ""),
+            editorName = doc.getString("publisherName") ?: existing?.editorName,
+            editorPhone = doc.getString("publisherPhone") ?: existing?.editorPhone
         )
-
-        if (existing == null) {
-            dbRoom.kendaraanDao().insert(k)
-        } else {
-            dbRoom.kendaraanDao().update(k)
-        }
+        if (existing == null) dbRoom.kendaraanDao().insert(k) else dbRoom.kendaraanDao().update(k)
         return true
     }
 
@@ -452,23 +423,13 @@ class SyncActivity : AppCompatActivity() {
         val nopol = doc.getString("nopol") ?: return false
         val leasing = doc.getString("leasing") ?: return false
         val cabang = doc.getString("cabang") ?: ""
-
-        // Cari kendaraan lokal berdasarkan nopol + leasing + cabang (jika ada)
         var existing = dbRoom.kendaraanDao().getKendaraanByNopolLeasingCabang(nopol, leasing, cabang)
-        if (existing == null) {
-            // Fallback ke nopol + leasing
-            existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
-        }
-
+        if (existing == null) existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
         if (existing != null) {
-            val noteText = doc.getString("noteText") ?: return false
-            val editorName = doc.getString("editorName")
-            val editorPhone = doc.getString("editorPhone")
-
             val updated = existing.copy(
-                catatan = noteText,
-                editorName = editorName ?: existing.editorName,
-                editorPhone = editorPhone ?: existing.editorPhone
+                catatan = doc.getString("noteText") ?: existing.catatan,
+                editorName = doc.getString("editorName") ?: existing.editorName,
+                editorPhone = doc.getString("editorPhone") ?: existing.editorPhone
             )
             dbRoom.kendaraanDao().update(updated)
             return true
@@ -478,28 +439,21 @@ class SyncActivity : AppCompatActivity() {
 
     private fun extractGroup(nopol: String): String {
         val regex = "\\d+".toRegex()
-        val match = regex.find(nopol)
-        return match?.value ?: "0000"
+        return regex.find(nopol)?.value ?: "0000"
     }
 
     private fun generateSearchKey(vararg fields: String): String {
-        return fields.joinToString("") { 
-            it.uppercase(Locale.getDefault())
-                .replace("\\s".toRegex(), "")
-                .replace("-", "") 
-        }
+        return fields.joinToString("") { it.uppercase(Locale.getDefault()).replace("\\s".toRegex(), "").replace("-", "") }
     }
 
     private fun saveSyncTime() {
         val now = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID")).format(Date())
-        val prefs = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putString("last_sync_time", now).apply()
+        getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE).edit().putString("last_sync_time", now).apply()
         binding.tvUpdateTerakhir.text = "Update Terakhir: $now"
     }
 
     private fun loadLastSyncTime() {
-        val prefs = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
-        val lastSync = prefs.getString("last_sync_time", "-")
+        val lastSync = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE).getString("last_sync_time", "-")
         binding.tvUpdateTerakhir.text = "Update Terakhir: $lastSync"
     }
 
