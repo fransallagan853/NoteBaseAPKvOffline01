@@ -9,7 +9,7 @@
         android:id="@+id/tvLogo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="noteBase"
+        android:text="NoteBase"
         android:textColor="@color/cyan_accent"
         android:textSize="42sp"
         android:textStyle="bold"
@@ -17,28 +17,41 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.45" />
+        app:layout_constraintVertical_bias="0.34" />
 
     <TextView
         android:id="@+id/tvTagline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Database Nopol Offline"
+        android:text="Data Nomor Kendaraan Mobil"
         android:textColor="@color/gray_text"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/tvLogo"
-        app:layout_constraintStart_toStartOf="@+id/tvLogo"
-        app:layout_constraintTop_toBottomOf="@+id/tvLogo" />
+        app:layout_constraintEnd_toEndOf="@id/tvLogo"
+        app:layout_constraintStart_toStartOf="@id/tvLogo"
+        app:layout_constraintTop_toBottomOf="@id/tvLogo" />
+
+    <ImageView
+        android:id="@+id/imgCarSplash"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="36dp"
+        android:alpha="0.9"
+        android:src="@drawable/ic_car_splash"
+        app:tint="@color/cyan_accent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTagline" />
 
     <ProgressBar
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginBottom="64dp"
-        android:indeterminateTint="@color/cyan_accent"
+        android:id="@+id/progressSplash"
         style="?android:attr/progressBarStyle"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="42dp"
+        android:indeterminateTint="@color/cyan_accent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imgCarSplash" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,7 +29,7 @@
                     android:id="@+id/tvTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="noteBase"
+                    android:text="NoteBase"
                     android:textColor="@color/cyan_accent"
                     android:textSize="26sp"
                     android:textStyle="bold" />
@@ -37,7 +37,7 @@
                     android:id="@+id/tvTagline"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Database Nopol Offline"
+                    android:text="Data Nomor Kendaraan Mobil"
                     android:textColor="@color/gray_text"
                     android:textSize="11sp"
                     android:alpha="0.8" />
