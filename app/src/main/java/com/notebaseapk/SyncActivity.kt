@@ -59,6 +59,7 @@ class SyncActivity : AppCompatActivity() {
             if (user == null) {
                 Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show()
             } else {
+                showSyncProgress(0, "Mengecek akun...")
                 checkSubscriptionAndSync(user.uid)
             }
         }
@@ -77,6 +78,35 @@ class SyncActivity : AppCompatActivity() {
             params.bottomMargin = navBarHeight
             view.layoutParams = params
             insets
+        }
+    }
+
+    private fun showSyncProgress(progress: Int, status: String) {
+        runOnUiThread {
+            binding.layoutSyncProgress.visibility = View.VISIBLE
+            binding.syncProgressIndicator.setProgressCompat(progress, true)
+            binding.tvSyncPercent.text = "$progress%"
+            binding.tvSyncStatus.text = status
+            binding.btnCheckUpdate.isEnabled = false
+        }
+    }
+
+    private fun updateSyncProgress(progress: Int, status: String) {
+        runOnUiThread {
+            binding.layoutSyncProgress.visibility = View.VISIBLE
+            binding.syncProgressIndicator.setProgressCompat(progress, true)
+            binding.tvSyncPercent.text = "$progress%"
+            binding.tvSyncStatus.text = status
+        }
+    }
+
+    private fun finishSyncProgress(progress: Int, status: String) {
+        runOnUiThread {
+            binding.layoutSyncProgress.visibility = View.VISIBLE
+            binding.syncProgressIndicator.setProgressCompat(progress, true)
+            binding.tvSyncPercent.text = "$progress%"
+            binding.tvSyncStatus.text = status
+            binding.btnCheckUpdate.isEnabled = true
         }
     }
 
@@ -132,6 +162,7 @@ class SyncActivity : AppCompatActivity() {
     private fun checkSubscriptionAndSync(uid: String) {
         lifecycleScope.launch {
             try {
+                updateSyncProgress(5, "Mengecek status langganan...")
                 val doc = firestore.collection("users").document(uid).get().await()
                 val subStatus = doc.getString("subscriptionStatus") ?: "inactive"
                 val activeUntil = doc.getTimestamp("activeUntil")
@@ -140,6 +171,7 @@ class SyncActivity : AppCompatActivity() {
                 if (subStatus == "active" && activeUntil != null && activeUntil.seconds > now.seconds) {
                     checkServerUpdate()
                 } else {
+                    finishSyncProgress(0, "Langganan belum aktif")
                     Toast.makeText(
                         this@SyncActivity,
                         "Langganan belum aktif. Hubungi admin untuk aktivasi.",
@@ -147,6 +179,7 @@ class SyncActivity : AppCompatActivity() {
                     ).show()
                 }
             } catch (e: Exception) {
+                finishSyncProgress(0, "Gagal mengecek langganan")
                 Toast.makeText(
                     this@SyncActivity,
                     "Gagal mengecek status: ${e.message}",
@@ -158,6 +191,7 @@ class SyncActivity : AppCompatActivity() {
 
     private suspend fun checkServerUpdate() {
         try {
+            updateSyncProgress(10, "Mengecek update server...")
             val resultText = withContext(Dispatchers.IO) {
                 val request = Request.Builder()
                     .url("http://192.168.18.34:5000/api/update/latest")
@@ -175,6 +209,7 @@ class SyncActivity : AppCompatActivity() {
             val versionCode = data.optLong("versionCode", 0L)
             val totalRows = data.optInt("totalRows", 0)
             val gzipFile = data.optString("gzipFile", "")
+            updateSyncProgress(20, "Update ditemukan: $totalRows data")
 
             if (gzipFile.isEmpty()) {
                 withContext(Dispatchers.Main) {
@@ -188,6 +223,7 @@ class SyncActivity : AppCompatActivity() {
 
             if (versionCode != 0L && versionCode == lastImportedVersion) {
                 withContext(Dispatchers.Main) {
+                    finishSyncProgress(100, "Data sudah versi terbaru")
                     Toast.makeText(this@SyncActivity, "Data sudah versi terbaru", Toast.LENGTH_SHORT).show()
                 }
                 return
@@ -198,6 +234,7 @@ class SyncActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("SyncActivity", "Error checkServerUpdate", e)
             withContext(Dispatchers.Main) {
+                finishSyncProgress(0, "Gagal cek update server")
                 Toast.makeText(this@SyncActivity, "Gagal cek update server: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
@@ -218,11 +255,30 @@ class SyncActivity : AppCompatActivity() {
 
                 okHttpClient.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) throw Exception("Gagal download: ${response.code}")
-                    
+
                     val body = response.body ?: throw Exception("Isi file kosong")
+                    val totalBytes = body.contentLength()
+                    var downloadedBytes = 0L
+                    val buffer = ByteArray(8 * 1024)
+
                     body.byteStream().use { input ->
                         FileOutputStream(gzippedFile).use { output ->
-                            input.copyTo(output)
+                            while (true) {
+                                val read = input.read(buffer)
+                                if (read == -1) break
+
+                                output.write(buffer, 0, read)
+                                downloadedBytes += read
+
+                                if (totalBytes > 0) {
+                                    val downloadProgress =
+                                        25 + ((downloadedBytes * 25) / totalBytes).toInt()
+                                    updateSyncProgress(
+                                        downloadProgress.coerceIn(25, 50),
+                                        "Mengunduh file update..."
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -254,7 +310,7 @@ class SyncActivity : AppCompatActivity() {
 
             try {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@SyncActivity, "Sedang mengimpor data...", Toast.LENGTH_SHORT).show()
+                    updateSyncProgress(65, "Mengimpor data...")
                 }
 
                 // 1. Ambil data lama ke memori untuk pencocokan cepat (nopol|leasing)
@@ -264,7 +320,7 @@ class SyncActivity : AppCompatActivity() {
 
                 sqliteDb = SQLiteDatabase.openDatabase(sqliteFile.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
                 cursor = sqliteDb.rawQuery("SELECT * FROM kendaraan_update", null)
-
+                val totalImportRows = cursor?.count ?: 0
                 val toInsert = mutableListOf<Kendaraan>()
                 val toUpdate = mutableListOf<Kendaraan>()
                 val batchSize = 5000
@@ -336,6 +392,13 @@ class SyncActivity : AppCompatActivity() {
                         }
                         importCount++
 
+                        if (importCount % 500 == 0 && totalImportRows > 0) {
+                            val importProgress = 65 + ((importCount * 30) / totalImportRows)
+                            updateSyncProgress(
+                                importProgress.coerceIn(65, 95),
+                                "Mengimpor data... $importCount/$totalImportRows"
+                            )
+                        }
                         // Eksekusi batch jika sudah mencapai batchSize
                         if (toInsert.size + toUpdate.size >= batchSize) {
                             dbRoom.kendaraanDao().importData(toInsert, toUpdate)
@@ -352,6 +415,7 @@ class SyncActivity : AppCompatActivity() {
                 }
 
                 withContext(Dispatchers.Main) {
+                    finishSyncProgress(100, "Sinkron selesai")
                     Toast.makeText(this@SyncActivity, "Import selesai: $importCount data masuk", Toast.LENGTH_LONG).show()
                     
                     val prefs = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
@@ -363,6 +427,7 @@ class SyncActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.e("SyncActivity", "Error importSqliteUpdateToRoom", e)
                 withContext(Dispatchers.Main) {
+                    finishSyncProgress(0, "Gagal import data")
                     Toast.makeText(this@SyncActivity, "Gagal import data: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             } finally {
