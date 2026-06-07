@@ -5,10 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
-import android.widget.Button
 import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -33,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nopolAdapter: NopolAdapter
     private var searchJob: Job? = null
     private var inflatedKeyboard: View? = null
+    private lateinit var customKeyboardManager: CustomKeyboardManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +53,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        setupCustomKeyboard()
+        if (::customKeyboardManager.isInitialized) {
+            customKeyboardManager.refreshLayout()
+        }
     }
 
     private fun setupSafeBottomNav() {
@@ -86,19 +86,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupSearch() {
-        binding.etSearch.showSoftInputOnFocus = false
-        
-        binding.etSearch.setOnFocusChangeListener { _, hasFocus ->
-            binding.keyboardContainer.visibility = if (hasFocus) View.VISIBLE else View.GONE
-        }
-        
-        binding.etSearch.setOnTouchListener { v, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                v.requestFocus()
-                binding.keyboardContainer.visibility = View.VISIBLE
-            }
-            false
-        }
+        customKeyboardManager = CustomKeyboardManager(
+            activity = this,
+            keyboardContainer = binding.keyboardContainer
+        )
+
+        customKeyboardManager.setup(
+            listOf(binding.etSearch)
+        )
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -109,60 +104,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun setupCustomKeyboard() {
-        val sharedPref = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
-        val layoutKey = sharedPref.getString("keyboard_layout", "default") ?: "default"
-        
-        val layoutRes = when (layoutKey) {
-            "qwerty_numpad" -> R.layout.layout_keyboard_qwerty_numpad
-            "numpad_top" -> R.layout.layout_keyboard_numpad_top
-            "numpad_bottom" -> R.layout.layout_keyboard_numpad_bottom
-            else -> R.layout.layout_keyboard_default
-        }
 
-        binding.keyboardContainer.removeAllViews()
-        val view = LayoutInflater.from(this).inflate(layoutRes, binding.keyboardContainer, true)
-
-        val buttonIds = listOf(
-            R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4, R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9,
-            R.id.btnQ, R.id.btnW, R.id.btnE, R.id.btnR, R.id.btnT, R.id.btnY, R.id.btnU, R.id.btnI, R.id.btnO, R.id.btnP,
-            R.id.btnA, R.id.btnS, R.id.btnD, R.id.btnF, R.id.btnG, R.id.btnH, R.id.btnJ, R.id.btnK, R.id.btnL,
-            R.id.btnZ, R.id.btnX, R.id.btnC, R.id.btnV, R.id.btnB, R.id.btnN, R.id.btnM
-        )
-
-        buttonIds.forEach { id ->
-            view.findViewById<View>(id)?.setOnClickListener {
-                if (it is Button) {
-                    appendSearchText(it.text.toString())
-                }
-            }
-        }
-
-        view.findViewById<View>(R.id.btnClear)?.setOnClickListener { clearSearch() }
-        view.findViewById<View>(R.id.btnBackspace)?.setOnClickListener { deleteChar() }
-        view.findViewById<View>(R.id.btnSearch)?.setOnClickListener {
-            binding.keyboardContainer.visibility = View.GONE
-            binding.etSearch.clearFocus()
-        }
-    }
-
-    private fun appendSearchText(value: String) {
-        val start = binding.etSearch.selectionStart
-        val end = binding.etSearch.selectionEnd
-        binding.etSearch.text.replace(start, end, value)
-    }
-
-    private fun deleteChar() {
-        val start = binding.etSearch.selectionStart
-        val end = binding.etSearch.selectionEnd
-        if (start > 0 || start != end) {
-            binding.etSearch.text.delete(if (start == end) start - 1 else start, end)
-        }
-    }
-
-    private fun clearSearch() {
-        binding.etSearch.setText("")
-    }
 
     private fun performSearch(query: String) {
         searchJob?.cancel()
