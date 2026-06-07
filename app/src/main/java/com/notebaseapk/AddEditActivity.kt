@@ -138,8 +138,19 @@ class AddEditActivity : AppCompatActivity() {
             }
 
             val groupNumber = extractGroup(nopol)
-            val searchKey = generateSearchKey(nopol, nama, tahun, warna, leasing, cabang, saldo, ovd, catatan)
-
+            val searchKey = generateSearchKey(
+                nopol,
+                nama,
+                tahun,
+                warna,
+                rangka,
+                mesin,
+                leasing,
+                cabang,
+                saldo,
+                ovd,
+                catatan
+            )
             val kendaraan = Kendaraan(
                 id = if (vehicleId == -1) 0 else vehicleId,
                 nopol = nopol,

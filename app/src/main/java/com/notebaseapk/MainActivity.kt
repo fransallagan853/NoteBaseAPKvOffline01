@@ -139,8 +139,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun normalizeSearchText(text: String): String {
         return text.uppercase(Locale.getDefault())
-            .replace("\\s".toRegex(), "")
-            .replace("-", "")
+            .replace("[^A-Z0-9]".toRegex(), "")
             .trim()
     }
 

@@ -363,7 +363,19 @@ class SyncActivity : AppCompatActivity() {
                         var searchKey = cursor.getString(colSearchKey) ?: ""
 
                         if (searchKey.isBlank()) {
-                            searchKey = generateSearchKey(nopol, nama, leasing, cabang)
+                            searchKey = generateSearchKey(
+                                nopol,
+                                nama,
+                                tahun,
+                                warna,
+                                rangka,
+                                mesin,
+                                leasing,
+                                cabang,
+                                saldo,
+                                overdue,
+                                catatan
+                            )
                         }
 
                         val k = Kendaraan(
@@ -461,26 +473,59 @@ class SyncActivity : AppCompatActivity() {
     private suspend fun upsertVehicle(doc: DocumentSnapshot): Boolean {
         val nopol = doc.getString("nopol") ?: return false
         val leasing = doc.getString("leasing") ?: return false
+
         val existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
+
+        val nama = doc.getString("namaKendaraan") ?: ""
+        val groupNumber = doc.getString("groupNumber") ?: extractGroup(nopol)
+        val tahun = doc.getString("tahun") ?: ""
+        val warna = doc.getString("warna") ?: ""
+        val rangka = doc.getString("noRangka") ?: ""
+        val mesin = doc.getString("noMesin") ?: ""
+        val cabang = doc.getString("cabang") ?: ""
+        val saldo = doc.getString("saldo") ?: ""
+        val overdue = doc.getString("overdue") ?: ""
+        val catatan = doc.getString("catatan") ?: ""
+
+        val searchKey = generateSearchKey(
+            nopol,
+            nama,
+            tahun,
+            warna,
+            rangka,
+            mesin,
+            leasing,
+            cabang,
+            saldo,
+            overdue,
+            catatan
+        )
+
         val k = Kendaraan(
             id = existing?.id ?: 0,
             nopol = nopol,
-            groupNumber = doc.getString("groupNumber") ?: extractGroup(nopol),
-            namaKendaraan = doc.getString("namaKendaraan") ?: "",
-            tahun = doc.getString("tahun") ?: "",
-            warna = doc.getString("warna") ?: "",
-            noRangka = doc.getString("noRangka") ?: "",
-            noMesin = doc.getString("noMesin") ?: "",
+            groupNumber = groupNumber,
+            namaKendaraan = nama,
+            tahun = tahun,
+            warna = warna,
+            noRangka = rangka,
+            noMesin = mesin,
             leasing = leasing,
-            cabang = doc.getString("cabang") ?: "",
-            saldo = doc.getString("saldo") ?: "",
-            overdue = doc.getString("overdue") ?: "",
-            catatan = doc.getString("catatan") ?: "",
-            searchKey = doc.getString("searchKey") ?: generateSearchKey(nopol, doc.getString("namaKendaraan") ?: "", leasing, doc.getString("cabang") ?: ""),
+            cabang = cabang,
+            saldo = saldo,
+            overdue = overdue,
+            catatan = catatan,
+            searchKey = searchKey,
             editorName = doc.getString("publisherName") ?: existing?.editorName,
             editorPhone = doc.getString("publisherPhone") ?: existing?.editorPhone
         )
-        if (existing == null) dbRoom.kendaraanDao().insert(k) else dbRoom.kendaraanDao().update(k)
+
+        if (existing == null) {
+            dbRoom.kendaraanDao().insert(k)
+        } else {
+            dbRoom.kendaraanDao().update(k)
+        }
+
         return true
     }
 
@@ -508,7 +553,10 @@ class SyncActivity : AppCompatActivity() {
     }
 
     private fun generateSearchKey(vararg fields: String): String {
-        return fields.joinToString("") { it.uppercase(Locale.getDefault()).replace("\\s".toRegex(), "").replace("-", "") }
+        return fields.joinToString("") {
+            it.uppercase(Locale.getDefault())
+                .replace("[^A-Z0-9]".toRegex(), "")
+        }
     }
 
     private fun saveSyncTime() {
