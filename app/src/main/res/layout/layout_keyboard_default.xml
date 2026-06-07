@@ -119,6 +119,16 @@
             android:scaleType="center"
             android:focusable="false"
             app:tint="@color/red_delete" />
+        <Button
+            android:id="@+id/btnSpace"
+            style="@style/KeyboardBtnAction"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:text="SPASI"
+            android:textColor="@color/white_text"
+            android:textStyle="bold"
+            android:focusable="false" />
         <Button android:id="@+id/btn0" style="@style/KeyboardBtnNumeric" android:text="0" android:focusable="false" />
         <ImageButton
             android:id="@+id/btnBackspace"

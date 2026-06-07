@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 class GroupDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGroupDetailBinding
     private lateinit var db: AppDatabase
+    private lateinit var customKeyboardManager: CustomKeyboardManager
     private lateinit var adapter: NopolAdapter
     private var groupNumber: String = ""
 
@@ -23,6 +24,7 @@ class GroupDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityGroupDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setupCustomKeyboard()
 
         groupNumber = intent.getStringExtra("GROUP_NUMBER") ?: ""
         db = AppDatabase.getDatabase(this)
@@ -34,7 +36,25 @@ class GroupDetailActivity : AppCompatActivity() {
         setupFilter()
         observeData()
     }
+    private fun setupCustomKeyboard() {
+        customKeyboardManager = CustomKeyboardManager(
+            activity = this,
+            keyboardContainer = binding.keyboardContainer
+        )
 
+        customKeyboardManager.setup(
+            listOf(
+                binding.etFilter
+            )
+        )
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (::customKeyboardManager.isInitialized) {
+            customKeyboardManager.refreshLayout()
+        }
+    }
     private fun setupRecyclerView() {
         adapter = NopolAdapter(emptyList()) { kendaraan ->
             val intent = Intent(this, DetailActivity::class.java)

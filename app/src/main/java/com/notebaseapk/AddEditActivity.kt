@@ -17,6 +17,7 @@ import java.util.Locale
 class AddEditActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddEditBinding
     private lateinit var db: AppDatabase
+    private lateinit var customKeyboardManager: CustomKeyboardManager
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private var vehicleId: Int = -1
@@ -25,9 +26,9 @@ class AddEditActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAddEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         db = AppDatabase.getDatabase(this)
         vehicleId = intent.getIntExtra("VEHICLE_ID", -1)
+        setupCustomKeyboard()
 
         if (vehicleId != -1) {
             binding.tvTitle.text = "Edit Data"
@@ -37,7 +38,35 @@ class AddEditActivity : AppCompatActivity() {
         binding.btnBack.setOnClickListener { finish() }
         binding.btnSave.setOnClickListener { saveVehicle() }
     }
+    private fun setupCustomKeyboard() {
+        customKeyboardManager = CustomKeyboardManager(
+            activity = this,
+            keyboardContainer = binding.keyboardContainer
+        )
 
+        customKeyboardManager.setup(
+            listOf(
+                binding.etNopol,
+                binding.etNamaKendaraan,
+                binding.etTahun,
+                binding.etWarna,
+                binding.etLeasing,
+                binding.etCabang,
+                binding.etSaldo,
+                binding.etOverdue,
+                binding.etNoRangka,
+                binding.etNoMesin,
+                binding.etCatatan
+            )
+        )
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (::customKeyboardManager.isInitialized) {
+            customKeyboardManager.refreshLayout()
+        }
+    }
     private fun loadVehicleData() {
         lifecycleScope.launch {
             db.kendaraanDao().getKendaraanById(vehicleId)?.let {

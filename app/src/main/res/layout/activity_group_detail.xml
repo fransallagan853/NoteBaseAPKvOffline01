@@ -83,8 +83,19 @@
         android:layout_marginBottom="48dp"
         android:paddingBottom="24dp"
         android:clipToPadding="false"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/keyboardContainer"
         app:layout_constraintTop_toBottomOf="@id/headerLayout"
         tools:listitem="@layout/item_nopol_compact" />
+
+    <LinearLayout
+        android:id="@+id/keyboardContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:elevation="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

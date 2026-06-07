@@ -91,7 +91,9 @@ class CustomKeyboardManager(
         view.findViewById<View>(R.id.btnBackspace)?.setOnClickListener {
             deleteChar()
         }
-
+        view.findViewById<View>(R.id.btnSpace)?.setOnClickListener {
+            appendText(" ")
+        }
         view.findViewById<View>(R.id.btnSearch)?.setOnClickListener {
             hideKeyboard()
         }
