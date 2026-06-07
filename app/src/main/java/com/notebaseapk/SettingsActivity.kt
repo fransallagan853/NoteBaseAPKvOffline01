@@ -110,9 +110,9 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        binding.btnClearData.setOnClickListener {
-            showClearDataDialog()
-        }
+        // binding.btnClearData.setOnClickListener {
+           //  showClearDataDialog()
+        // }
     }
 
     private fun showClearDataDialog() {
