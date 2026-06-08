@@ -187,29 +187,29 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkAndInsertDummyData() {
-        lifecycleScope.launch {
-            val count = db.kendaraanDao().getCountSync()
-            if (count == 0) {
-                val mandatory = listOf(
-                    Triple("B 6372 EDC", "Toyota Fortuner", "ADIRA"),
-                    Triple("B 6372 EFC", "Toyota Rush", "OTTO"),
-                    Triple("D 6372 SCS", "Honda Jazz", "BCA")
-                )
-                db.kendaraanDao().insertAll(mandatory.mapIndexed { _, triple ->
-                    val nopol = triple.first
-                    Kendaraan(
-                        nopol = nopol,
-                        groupNumber = extractGroup(nopol),
-                        namaKendaraan = triple.second,
-                        leasing = triple.third,
-                        searchKey = generateSearchKey(nopol, triple.second, triple.third),
-                        catatan = "Unit dummy"
-                    )
-                })
-            }
-        }
-    }
+    // private fun checkAndInsertDummyData() {
+       // lifecycleScope.launch {
+         //   val count = db.kendaraanDao().getCountSync()
+           // if (count == 0) {
+             //   val mandatory = listOf(
+               //     Triple("B 6372 EDC", "Toyota Fortuner", "ADIRA"),
+                 //   Triple("B 6372 EFC", "Toyota Rush", "OTTO"),
+                   // Triple("D 6372 SCS", "Honda Jazz", "BCA")
+                  // )
+               // db.kendaraanDao().insertAll(mandatory.mapIndexed { _, triple ->
+                  //  val nopol = triple.first
+                   // Kendaraan(
+                     //   nopol = nopol,
+                       // groupNumber = extractGroup(nopol),
+                       // namaKendaraan = triple.second,
+                       // leasing = triple.third,
+                       // searchKey = generateSearchKey(nopol, triple.second, triple.third),
+                       // catatan = "Unit dummy"
+                 //   )
+               // })
+          //  }
+       // }
+   // }
 
     private fun extractGroup(nopol: String): String {
         val regex = "\\d+".toRegex()
