@@ -490,14 +490,11 @@ class SyncActivity : AppCompatActivity() {
         val searchKey = generateSearchKey(
             nopol,
             nama,
-            tahun,
             warna,
             rangka,
             mesin,
             leasing,
             cabang,
-            saldo,
-            overdue,
             catatan
         )
 

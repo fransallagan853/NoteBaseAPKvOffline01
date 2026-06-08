@@ -141,14 +141,11 @@ class AddEditActivity : AppCompatActivity() {
             val searchKey = generateSearchKey(
                 nopol,
                 nama,
-                tahun,
                 warna,
                 rangka,
                 mesin,
                 leasing,
                 cabang,
-                saldo,
-                ovd,
                 catatan
             )
             val kendaraan = Kendaraan(
