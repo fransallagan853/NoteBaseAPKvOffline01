@@ -137,16 +137,6 @@
 
                     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_color" android:layout_marginHorizontal="12dp"/>
 
-                    <RadioButton
-                        android:id="@+id/rbCustomManual"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:text="Custom Manual"
-                        android:textColor="@color/white_text"
-                        android:buttonTint="@color/cyan_accent"
-                        android:textSize="15sp"
-                        android:paddingStart="12dp" />
-
                 </RadioGroup>
             </com.google.android.material.card.MaterialCardView>
 

@@ -28,7 +28,7 @@ class KeyboardSettingsActivity : AppCompatActivity() {
             "qwerty_numpad" -> binding.rbQwertyNumpad.isChecked = true
             "numpad_top" -> binding.rbNumpadTop.isChecked = true
             "numpad_bottom" -> binding.rbNumpadBottom.isChecked = true
-            "custom_manual" -> binding.rbCustomManual.isChecked = true
+            //"custom_manual" -> binding.rbCustomManual.isChecked = true
         }
 
         binding.btnBack.setOnClickListener {
@@ -42,7 +42,7 @@ class KeyboardSettingsActivity : AppCompatActivity() {
                 binding.rbQwertyNumpad.id -> "qwerty_numpad"
                 binding.rbNumpadTop.id -> "numpad_top"
                 binding.rbNumpadBottom.id -> "numpad_bottom"
-                binding.rbCustomManual.id -> "custom_manual"
+                //binding.rbCustomManual.id -> "custom_manual"
                 else -> "default"
             }
 
