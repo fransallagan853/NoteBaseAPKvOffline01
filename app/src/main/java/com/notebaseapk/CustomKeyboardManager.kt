@@ -62,6 +62,8 @@ class CustomKeyboardManager(
         keyboardContainer.removeAllViews()
         val view = LayoutInflater.from(activity).inflate(layoutRes, keyboardContainer, true)
 
+        applyKeyboardHeightScale(view)
+
         val buttonIds = listOf(
             R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4,
             R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9,
@@ -98,7 +100,27 @@ class CustomKeyboardManager(
             hideKeyboard()
         }
     }
+    private fun applyKeyboardHeightScale(root: View) {
+        val prefs = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
+        val scale = prefs.getFloat("keyboard_height_scale", 1.0f)
 
+        fun scaleView(view: View) {
+            val params = view.layoutParams
+
+            if (params != null && params.height > 0) {
+                params.height = (params.height * scale).toInt()
+                view.layoutParams = params
+            }
+
+            if (view is ViewGroup) {
+                for (i in 0 until view.childCount) {
+                    scaleView(view.getChildAt(i))
+                }
+            }
+        }
+
+        scaleView(root)
+    }
     private fun appendText(value: String) {
         val editText = activeEditText ?: return
 
