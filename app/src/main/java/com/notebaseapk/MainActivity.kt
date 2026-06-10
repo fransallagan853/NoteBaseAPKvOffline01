@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupSafeBottomNav()
+        setupMainKeyboardInset()
 
         db = AppDatabase.getDatabase(this)
         setupRecyclerViews()
@@ -164,7 +165,20 @@ class MainActivity : AppCompatActivity() {
             popup.show()
         }
     }
+    private fun setupMainKeyboardInset() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.keyboardContainer) { view, insets ->
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val extraMargin = (4 * resources.displayMetrics.density).toInt()
 
+            val params = view.layoutParams as ConstraintLayout.LayoutParams
+            params.bottomMargin = navBarHeight + extraMargin
+            view.layoutParams = params
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(binding.keyboardContainer)
+    }
     private fun setupBottomNav() {
         binding.menuHome.setOnClickListener {
             performSearch("")

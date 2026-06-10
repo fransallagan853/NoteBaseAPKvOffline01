@@ -44,7 +44,7 @@
         <Button android:id="@+id/btnL" style="@style/KeyboardBtnAlpha" android:text="L" android:focusable="false" />
     </LinearLayout>
 
-    <!-- Baris 3: Z X C V B N M [SEARCH] -->
+    <!-- Baris 3: Z X C V B N M [TUTUP] -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
@@ -57,11 +57,11 @@
         <Button android:id="@+id/btnN" style="@style/KeyboardBtnAlpha" android:text="N" android:focusable="false" />
         <Button android:id="@+id/btnM" style="@style/KeyboardBtnAlpha" android:text="M" android:focusable="false" />
         <Button
-            android:id="@+id/btnSearch"
+            android:id="@+id/btnTutup"
             style="@style/KeyboardBtnAction"
             android:layout_width="0dp"
             android:layout_weight="3"
-            android:text="SEARCH"
+            android:text="TUTUP"
             android:textColor="@color/cyan_accent"
             android:textStyle="bold"
             android:focusable="false" />

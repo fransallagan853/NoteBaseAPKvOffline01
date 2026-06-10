@@ -43,7 +43,7 @@
         <Button android:id="@+id/btnB" style="@style/KeyboardBtnAlpha" android:text="B" android:focusable="false" />
         <Button android:id="@+id/btnN" style="@style/KeyboardBtnAlpha" android:text="N" android:focusable="false" />
         <Button android:id="@+id/btnM" style="@style/KeyboardBtnAlpha" android:text="M" android:focusable="false" />
-        <Button android:id="@+id/btnSearch" style="@style/KeyboardBtnAction" android:layout_width="0dp" android:layout_weight="3" android:text="SEARCH" android:textColor="@color/cyan_accent" android:textStyle="bold" android:focusable="false" />
+        <Button android:id="@+id/btnTutup" style="@style/KeyboardBtnAction" android:layout_width="0dp" android:layout_weight="3" android:text="TUTUP" android:textColor="@color/cyan_accent" android:textStyle="bold" android:focusable="false" />
     </LinearLayout>
 
     <!-- Numpad part -->

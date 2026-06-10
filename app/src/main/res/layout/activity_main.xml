@@ -114,12 +114,15 @@
         tools:listitem="@layout/item_nopol_group" />
 
     <!-- Dynamic Custom Keyboard Container -->
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/keyboardContainer"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/bottomNav"
+        android:elevation="40dp"
+        android:translationZ="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -129,12 +132,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="115dp"
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="@color/cyan_accent"
         app:elevation="6dp"
         app:fabSize="normal"
-        app:layout_constraintBottom_toTopOf="@id/keyboardContainer"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@color/black_bg" />
 
@@ -222,6 +225,7 @@
                 android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
+
 
     <View
         android:layout_width="match_parent"

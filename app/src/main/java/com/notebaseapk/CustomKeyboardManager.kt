@@ -8,6 +8,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class CustomKeyboardManager(
     private val activity: Activity,
@@ -16,6 +18,7 @@ class CustomKeyboardManager(
     private var activeEditText: EditText? = null
 
     fun setup(editTexts: List<EditText>) {
+        applyKeyboardBottomInset()
         setupKeyboardLayout()
 
         editTexts.forEach { editText ->
@@ -47,7 +50,23 @@ class CustomKeyboardManager(
         keyboardContainer.visibility = View.GONE
         activeEditText?.clearFocus()
     }
+    private fun applyKeyboardBottomInset() {
+        ViewCompat.setOnApplyWindowInsetsListener(keyboardContainer) { view, insets ->
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val extraMargin = (8 * view.resources.displayMetrics.density).toInt()
 
+            val params = view.layoutParams
+
+            if (params is ViewGroup.MarginLayoutParams) {
+                params.bottomMargin = navBarHeight + extraMargin
+                view.layoutParams = params
+            }
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(keyboardContainer)
+    }
     private fun setupKeyboardLayout() {
         val sharedPref = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
         val layoutKey = sharedPref.getString("keyboard_layout", "default") ?: "default"
@@ -96,7 +115,7 @@ class CustomKeyboardManager(
         view.findViewById<View>(R.id.btnSpace)?.setOnClickListener {
             appendText(" ")
         }
-        view.findViewById<View>(R.id.btnSearch)?.setOnClickListener {
+        view.findViewById<View>(R.id.btnTutup)?.setOnClickListener {
             hideKeyboard()
         }
     }
