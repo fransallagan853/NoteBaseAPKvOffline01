@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.notebaseapk.data.AppDatabase
+import com.notebaseapk.data.FavoriteVehicle
 import com.notebaseapk.data.Kendaraan
 import com.notebaseapk.databinding.ActivityDetailBinding
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
     private var vehicleId: Int = -1
     private var kendaraan: Kendaraan? = null
+    private var isFavorite: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +40,7 @@ class DetailActivity : AppCompatActivity() {
     private fun loadData() {
         lifecycleScope.launch {
             kendaraan = db.kendaraanDao().getKendaraanById(vehicleId)
+
             kendaraan?.let {
                 binding.tvNopol.text = it.nopol
                 binding.tvNamaKendaraan.text = it.namaKendaraan
@@ -58,6 +61,8 @@ class DetailActivity : AppCompatActivity() {
                 } else {
                     binding.editorInfoLayout.visibility = View.GONE
                 }
+
+                checkFavoriteStatus(it)
             } ?: run {
                 finish()
             }
@@ -82,6 +87,59 @@ class DetailActivity : AppCompatActivity() {
         binding.btnCopy.setOnClickListener {
             kendaraan?.let { copyToClipboard(it) }
         }
+
+        binding.btnFavorite.setOnClickListener {
+            kendaraan?.let { toggleFavorite(it) }
+        }
+    }
+
+    private fun checkFavoriteStatus(k: Kendaraan) {
+        lifecycleScope.launch {
+            val count = db.favoriteVehicleDao().isFavorite(
+                nopol = k.nopol,
+                leasing = k.leasing,
+                cabang = k.cabang
+            )
+
+            isFavorite = count > 0
+            updateFavoriteButton()
+        }
+    }
+
+    private fun toggleFavorite(k: Kendaraan) {
+        lifecycleScope.launch {
+            if (isFavorite) {
+                db.favoriteVehicleDao().deleteFavoriteByKey(
+                    nopol = k.nopol,
+                    leasing = k.leasing,
+                    cabang = k.cabang
+                )
+
+                isFavorite = false
+                Toast.makeText(this@DetailActivity, "Dihapus dari favorit", Toast.LENGTH_SHORT).show()
+            } else {
+                val favorite = FavoriteVehicle(
+                    nopol = k.nopol,
+                    leasing = k.leasing,
+                    cabang = k.cabang
+                )
+
+                db.favoriteVehicleDao().insertFavorite(favorite)
+
+                isFavorite = true
+                Toast.makeText(this@DetailActivity, "Ditambahkan ke favorit", Toast.LENGTH_SHORT).show()
+            }
+
+            updateFavoriteButton()
+        }
+    }
+
+    private fun updateFavoriteButton() {
+        if (isFavorite) {
+            binding.btnFavorite.text = "★ Difavoritkan"
+        } else {
+            binding.btnFavorite.text = "☆ Favorit"
+        }
     }
 
     private fun buildShareText(it: Kendaraan): String {
@@ -104,7 +162,7 @@ class DetailActivity : AppCompatActivity() {
         if (!it.editorName.isNullOrEmpty()) {
             text += "\n\nDiedit oleh:\nNama: ${it.editorName}\nNo Telp: ${it.editorPhone ?: "-"}"
         }
-        
+
         return text
     }
 
@@ -132,6 +190,13 @@ class DetailActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     kendaraan?.let {
                         db.kendaraanDao().delete(it)
+
+                        db.favoriteVehicleDao().deleteFavoriteByKey(
+                            nopol = it.nopol,
+                            leasing = it.leasing,
+                            cabang = it.cabang
+                        )
+
                         finish()
                     }
                 }

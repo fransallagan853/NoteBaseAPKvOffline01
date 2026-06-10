@@ -350,6 +350,20 @@
         android:layout_marginBottom="48dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFavorite"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginBottom="8dp"
+            android:text="☆ Favorit"
+            android:textAllCaps="false"
+            android:textColor="@color/cyan_accent"
+            android:textStyle="bold"
+            app:backgroundTint="@color/charcoal_bg"
+            app:cornerRadius="12dp"
+            app:strokeColor="@color/cyan_accent"
+            app:strokeWidth="1dp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

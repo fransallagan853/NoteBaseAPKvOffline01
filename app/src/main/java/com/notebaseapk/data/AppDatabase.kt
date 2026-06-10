@@ -5,9 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Kendaraan::class], version = 6, exportSchema = false)
+@Database(
+    entities = [
+        Kendaraan::class,
+        FavoriteVehicle::class
+    ],
+    version = 7,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun kendaraanDao(): KendaraanDao
+    abstract fun favoriteVehicleDao(): FavoriteVehicleDao
 
     companion object {
         @Volatile
