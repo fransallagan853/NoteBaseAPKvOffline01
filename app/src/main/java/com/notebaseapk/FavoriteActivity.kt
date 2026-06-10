@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.notebaseapk.adapter.NopolAdapter
@@ -25,12 +28,26 @@ class FavoriteActivity : AppCompatActivity() {
 
         db = AppDatabase.getDatabase(this)
 
+        setupSafeBottomNav()
+        setupRecyclerView()
+        setupBottomNav()
+        observeFavorites()
+
         binding.btnBack.setOnClickListener {
             finish()
         }
+    }
 
-        setupRecyclerView()
-        observeFavorites()
+    private fun setupSafeBottomNav() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+
+            val params = view.layoutParams as ConstraintLayout.LayoutParams
+            params.bottomMargin = navBarHeight
+            view.layoutParams = params
+
+            insets
+        }
     }
 
     private fun setupRecyclerView() {
@@ -59,6 +76,32 @@ class FavoriteActivity : AppCompatActivity() {
 
                 binding.tvFavoriteCount.text = "${list.size} data favorit"
             }
+        }
+    }
+
+    private fun setupBottomNav() {
+        binding.menuHome.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
+            overridePendingTransition(0, 0)
+            finish()
+        }
+
+        binding.menuFavorite.setOnClickListener {
+            // Sudah di halaman Favorit
+        }
+
+        binding.menuSync.setOnClickListener {
+            startActivity(Intent(this, SyncActivity::class.java))
+            overridePendingTransition(0, 0)
+            finish()
+        }
+
+        binding.menuSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+            overridePendingTransition(0, 0)
+            finish()
         }
     }
 }
