@@ -13,6 +13,9 @@ import com.notebaseapk.databinding.ActivityAddEditBinding
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Locale
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class AddEditActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddEditBinding
@@ -26,6 +29,9 @@ class AddEditActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAddEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        setupSafeSaveButton()
+
         db = AppDatabase.getDatabase(this)
         vehicleId = intent.getIntExtra("VEHICLE_ID", -1)
         setupCustomKeyboard()
@@ -65,6 +71,18 @@ class AddEditActivity : AppCompatActivity() {
         super.onStart()
         if (::customKeyboardManager.isInitialized) {
             customKeyboardManager.refreshLayout()
+        }
+    }
+    private fun setupSafeSaveButton() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.btnSave) { view, insets ->
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val extraMargin = (16 * resources.displayMetrics.density).toInt()
+
+            val params = view.layoutParams as ConstraintLayout.LayoutParams
+            params.bottomMargin = navBarHeight + extraMargin
+            view.layoutParams = params
+
+            insets
         }
     }
     private fun loadVehicleData() {
