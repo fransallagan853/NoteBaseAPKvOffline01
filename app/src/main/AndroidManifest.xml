@@ -33,6 +33,7 @@
         <activity android:name=".SettingsActivity" android:exported="false" />
         <activity android:name=".SyncActivity" android:exported="false" />
         <activity android:name=".KeyboardSettingsActivity" android:exported="false" />
+        <activity android:name=".FavoriteActivity" />
         
     </application>
 

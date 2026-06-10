@@ -5,10 +5,19 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import com.notebaseapk.data.Kendaraan
 
 @Dao
 interface FavoriteVehicleDao {
-
+    @Query("""
+    SELECT k.* FROM kendaraan k
+    INNER JOIN favorite_vehicles f
+    ON k.nopol = f.nopol
+    AND k.leasing = f.leasing
+    AND k.cabang = f.cabang
+    ORDER BY f.createdAt DESC
+""")
+    fun getFavoriteKendaraanList(): Flow<List<Kendaraan>>
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertFavorite(favorite: FavoriteVehicle)
 

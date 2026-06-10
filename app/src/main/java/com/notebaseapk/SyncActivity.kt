@@ -574,6 +574,11 @@ class SyncActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(0, 0)
         }
+        binding.menuFavorite.setOnClickListener {
+            startActivity(Intent(this, FavoriteActivity::class.java))
+            overridePendingTransition(0, 0)
+            finish()
+        }
         binding.menuSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
             overridePendingTransition(0, 0)

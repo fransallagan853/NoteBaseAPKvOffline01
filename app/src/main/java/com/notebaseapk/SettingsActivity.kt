@@ -78,6 +78,11 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(0, 0)
         }
+        binding.menuFavorite.setOnClickListener {
+            startActivity(Intent(this, FavoriteActivity::class.java))
+            overridePendingTransition(0, 0)
+            finish()
+        }
         binding.menuSync.setOnClickListener {
             startActivity(Intent(this, SyncActivity::class.java))
             overridePendingTransition(0, 0)

@@ -183,6 +183,10 @@ class MainActivity : AppCompatActivity() {
         binding.menuHome.setOnClickListener {
             performSearch("")
         }
+        binding.menuFavorite.setOnClickListener {
+            startActivity(Intent(this, FavoriteActivity::class.java))
+            overridePendingTransition(0, 0)
+        }
         binding.menuSync.setOnClickListener {
             startActivity(Intent(this, SyncActivity::class.java))
             overridePendingTransition(0, 0)
