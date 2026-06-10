@@ -176,7 +176,7 @@
                         android:layout_marginTop="4dp"
                         android:text="0 Data"
                         android:textColor="@color/white_text"
-                        android:textSize="24sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -239,7 +239,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:text="Tentang"
+                android:text="Info Aplikasi"
                 android:textColor="@color/cyan_accent"
                 android:textSize="12sp"
                 android:textStyle="bold"
@@ -273,7 +273,28 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Database Nopol Mobil"
+                        android:text="Aplikasi bantu pencarian data nomor polisi kendaraan secara cepat dan praktis."
+                        android:textColor="@color/gray_text"
+                        android:textSize="14sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="16dp"
+                        android:background="@color/divider_color" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Peringatan"
+                        android:textColor="@color/white_text"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Aplikasi ini hanya alat bantu untuk pencarian nopol kendaraan. Segala bentuk penyalahgunaan data atau aktivitas melanggar hukum sepenuhnya menjadi tanggung jawab pengguna."
                         android:textColor="@color/gray_text"
                         android:textSize="14sp" />
 
@@ -286,7 +307,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Versi 1.0.1"
+                        android:text="Versi Aplikasi"
                         android:textColor="@color/gray_text"
                         android:textSize="12sp" />
 
@@ -294,7 +315,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Aplikasi pencarian nopol kendaraan mobil"
+                        android:text="NoteBase v1.0"
                         android:textColor="@color/gray_text"
                         android:textSize="12sp" />
                 </LinearLayout>
