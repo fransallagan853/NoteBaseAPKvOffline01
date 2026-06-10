@@ -72,7 +72,7 @@
                 android:id="@+id/cardUserInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="5dp"
                 android:visibility="gone"
                 app:cardBackgroundColor="@color/charcoal_bg"
                 app:cardCornerRadius="16dp"
@@ -83,7 +83,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="10dp">
 
                     <TextView
                         android:id="@+id/tvUserName"
@@ -117,7 +117,7 @@
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="5dp"
                         android:layout_gravity="end"
                         android:text="Logout"
                         android:textColor="@color/red_delete" />
@@ -129,7 +129,7 @@
                 style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="5dp"
                 android:text="Masuk / Daftar Akun"
                 android:textColor="@color/white_text"
                 app:backgroundTint="@color/charcoal_bg"
@@ -139,7 +139,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="15dp"
                 android:text="Statistik Database"
                 android:textColor="@color/cyan_accent"
                 android:textSize="12sp"
@@ -150,7 +150,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="5dp"
                 app:cardBackgroundColor="@color/charcoal_bg"
                 app:cardCornerRadius="16dp"
                 app:strokeWidth="0dp"
@@ -160,7 +160,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="10dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -185,7 +185,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="15dp"
                 android:text="Preferensi"
                 android:textColor="@color/cyan_accent"
                 android:textSize="12sp"
@@ -198,13 +198,13 @@
                 style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="0dp"
                 android:text="Pengaturan Keyboard"
                 android:textColor="@color/white_text"
                 app:backgroundTint="@color/charcoal_bg"
                 app:cornerRadius="12dp"
                 android:gravity="start|center_vertical"
-                android:paddingStart="16dp"
+                android:paddingStart="10dp"
                 app:icon="@drawable/ic_settings"
                 app:iconTint="@color/gray_text" />
 
@@ -238,7 +238,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="15dp"
                 android:text="Info Aplikasi"
                 android:textColor="@color/cyan_accent"
                 android:textSize="12sp"
@@ -249,7 +249,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="5dp"
                 app:cardBackgroundColor="@color/charcoal_bg"
                 app:cardCornerRadius="16dp"
                 app:strokeWidth="0dp"
@@ -259,7 +259,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="10dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -318,6 +318,13 @@
                         android:text="NoteBase v1.0"
                         android:textColor="@color/gray_text"
                         android:textSize="12sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="16dp"
+                        android:background="@color/charcoal_bg" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

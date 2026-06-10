@@ -44,10 +44,9 @@
         android:textStyle="bold"
         app:backgroundTint="@color/white_text"
         app:cornerRadius="12dp"
-
-        app:icon="@android:drawable/ic_menu_send"
+        app:icon="@drawable/ic_google"
         app:iconGravity="textStart"
-        app:iconTint="@color/black_bg"
+        app:iconTint="@null"
         app:layout_constraintBottom_toTopOf="@+id/btnSkip"
         app:layout_constraintTop_toBottomOf="@+id/tvSubtitle" />
 
