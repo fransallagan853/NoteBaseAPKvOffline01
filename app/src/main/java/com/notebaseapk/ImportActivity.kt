@@ -9,6 +9,9 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.notebaseapk.data.AppDatabase
 import com.notebaseapk.data.Kendaraan
@@ -43,6 +46,9 @@ class ImportActivity : AppCompatActivity() {
 
         db = AppDatabase.getDatabase(this)
 
+        setupSafeHeader()
+        setupSafeBottomNav()
+
         binding.btnBack.setOnClickListener { finish() }
         binding.btnSelectFile.setOnClickListener { filePicker.launch("text/comma-separated-values") }
         binding.btnStartImport.setOnClickListener { startImport() }
@@ -53,6 +59,25 @@ class ImportActivity : AppCompatActivity() {
         }
 
         setupBottomNav()
+    }
+
+    private fun setupSafeHeader() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val extraPadding = (16 * resources.displayMetrics.density).toInt()
+            view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
+            insets
+        }
+    }
+
+    private fun setupSafeBottomNav() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val params = view.layoutParams as ConstraintLayout.LayoutParams
+            params.bottomMargin = navBarHeight
+            view.layoutParams = params
+            insets
+        }
     }
 
     private fun setupBottomNav() {

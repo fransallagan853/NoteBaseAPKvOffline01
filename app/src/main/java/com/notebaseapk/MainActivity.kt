@@ -1,6 +1,5 @@
 package com.notebaseapk
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -13,15 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.notebaseapk.adapter.GroupAdapter
 import com.notebaseapk.adapter.NopolAdapter
 import com.notebaseapk.data.AppDatabase
-import com.notebaseapk.data.Kendaraan
 import com.notebaseapk.databinding.ActivityMainBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Locale
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.constraintlayout.widget.ConstraintLayout
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -29,7 +24,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var groupAdapter: GroupAdapter
     private lateinit var nopolAdapter: NopolAdapter
     private var searchJob: Job? = null
-    private var inflatedKeyboard: View? = null
     private lateinit var customKeyboardManager: CustomKeyboardManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,8 +31,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupSafeBottomNav()
-        setupMainKeyboardInset()
+        // Clean & Responsive UI using Extensions
+        binding.headerLayout.applyStatusBarPadding()
+        binding.bottomNav.applyNavigationBarMargin()
+        binding.keyboardContainer.applyNavigationBarMargin(4)
 
         db = AppDatabase.getDatabase(this)
         setupRecyclerViews()
@@ -49,23 +45,12 @@ class MainActivity : AppCompatActivity() {
         observeStats()
         
         performSearch("")
-        // checkAndInsertDummyData()
     }
 
     override fun onStart() {
         super.onStart()
         if (::customKeyboardManager.isInitialized) {
             customKeyboardManager.refreshLayout()
-        }
-    }
-
-    private fun setupSafeBottomNav() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
-            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-            val params = view.layoutParams as ConstraintLayout.LayoutParams
-            params.bottomMargin = navBarHeight
-            view.layoutParams = params
-            insets
         }
     }
 
@@ -104,8 +89,6 @@ class MainActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
     }
-
-
 
     private fun performSearch(query: String) {
         searchJob?.cancel()
@@ -165,20 +148,7 @@ class MainActivity : AppCompatActivity() {
             popup.show()
         }
     }
-    private fun setupMainKeyboardInset() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.keyboardContainer) { view, insets ->
-            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-            val extraMargin = (4 * resources.displayMetrics.density).toInt()
 
-            val params = view.layoutParams as ConstraintLayout.LayoutParams
-            params.bottomMargin = navBarHeight + extraMargin
-            view.layoutParams = params
-
-            insets
-        }
-
-        ViewCompat.requestApplyInsets(binding.keyboardContainer)
-    }
     private fun setupBottomNav() {
         binding.menuHome.setOnClickListener {
             performSearch("")
@@ -202,44 +172,6 @@ class MainActivity : AppCompatActivity() {
             db.kendaraanDao().getCount().collectLatest { count ->
                 binding.tvTotalData.text = "$count Data Tersimpan"
             }
-        }
-    }
-
-    // private fun checkAndInsertDummyData() {
-       // lifecycleScope.launch {
-         //   val count = db.kendaraanDao().getCountSync()
-           // if (count == 0) {
-             //   val mandatory = listOf(
-               //     Triple("B 6372 EDC", "Toyota Fortuner", "ADIRA"),
-                 //   Triple("B 6372 EFC", "Toyota Rush", "OTTO"),
-                   // Triple("D 6372 SCS", "Honda Jazz", "BCA")
-                  // )
-               // db.kendaraanDao().insertAll(mandatory.mapIndexed { _, triple ->
-                  //  val nopol = triple.first
-                   // Kendaraan(
-                     //   nopol = nopol,
-                       // groupNumber = extractGroup(nopol),
-                       // namaKendaraan = triple.second,
-                       // leasing = triple.third,
-                       // searchKey = generateSearchKey(nopol, triple.second, triple.third),
-                       // catatan = "Unit dummy"
-                 //   )
-               // })
-          //  }
-       // }
-   // }
-
-    private fun extractGroup(nopol: String): String {
-        val regex = "\\d+".toRegex()
-        val match = regex.find(nopol)
-        return match?.value ?: "0000"
-    }
-    
-    private fun generateSearchKey(vararg fields: String): String {
-        return fields.joinToString("") { 
-            it.uppercase(Locale.getDefault())
-                .replace("\\s".toRegex(), "")
-                .replace("-", "") 
         }
     }
 

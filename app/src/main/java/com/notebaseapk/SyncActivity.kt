@@ -47,6 +47,8 @@ class SyncActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         dbRoom = AppDatabase.getDatabase(this)
+        
+        setupSafeHeader()
         setupSafeBottomNav()
 
         binding.btnBack.setOnClickListener { finish() }
@@ -69,6 +71,15 @@ class SyncActivity : AppCompatActivity() {
         }
 
         setupBottomNav()
+    }
+
+    private fun setupSafeHeader() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val extraPadding = (16 * resources.displayMetrics.density).toInt()
+            view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
+            insets
+        }
     }
 
     private fun setupSafeBottomNav() {
@@ -313,8 +324,6 @@ class SyncActivity : AppCompatActivity() {
                     updateSyncProgress(65, "Mengimpor data...")
                 }
 
-                // 1. Ambil data lama ke memori untuk pencocokan cepat (nopol|leasing)
-                // Ini jauh lebih cepat daripada query satu per satu di dalam loop
                 val existingList = dbRoom.kendaraanDao().getAllKendaraanList()
                 val existingMap = existingList.associateBy { "${it.nopol}|${it.leasing}" }
 
@@ -326,7 +335,6 @@ class SyncActivity : AppCompatActivity() {
                 val batchSize = 5000
 
                 if (cursor != null && cursor.moveToFirst()) {
-                    // Ambil column index sekali saja
                     val colNopol = cursor.getColumnIndexOrThrow("nopol")
                     val colLeasing = cursor.getColumnIndexOrThrow("leasing")
                     val colCabang = cursor.getColumnIndexOrThrow("cabang")
@@ -348,7 +356,6 @@ class SyncActivity : AppCompatActivity() {
                         val leasing = cursor.getString(colLeasing) ?: ""
                         val cabang = cursor.getString(colCabang) ?: ""
 
-                        // Pencocokan cepat via Map
                         val existing = existingMap["$nopol|$leasing"]
 
                         val nama = cursor.getString(colNama) ?: ""
@@ -364,17 +371,7 @@ class SyncActivity : AppCompatActivity() {
 
                         if (searchKey.isBlank()) {
                             searchKey = generateSearchKey(
-                                nopol,
-                                nama,
-                                tahun,
-                                warna,
-                                rangka,
-                                mesin,
-                                leasing,
-                                cabang,
-                                saldo,
-                                overdue,
-                                catatan
+                                nopol, nama, tahun, warna, rangka, mesin, leasing, cabang, saldo, overdue, catatan
                             )
                         }
 
@@ -397,31 +394,21 @@ class SyncActivity : AppCompatActivity() {
                             editorPhone = existing?.editorPhone
                         )
 
-                        if (existing == null) {
-                            toInsert.add(k)
-                        } else {
-                            toUpdate.add(k)
-                        }
+                        if (existing == null) toInsert.add(k) else toUpdate.add(k)
                         importCount++
 
                         if (importCount % 500 == 0 && totalImportRows > 0) {
                             val importProgress = 65 + ((importCount * 30) / totalImportRows)
-                            updateSyncProgress(
-                                importProgress.coerceIn(65, 95),
-                                "Mengimpor data... $importCount/$totalImportRows"
-                            )
+                            updateSyncProgress(importProgress.coerceIn(65, 95), "Mengimpor data... $importCount/$totalImportRows")
                         }
-                        // Eksekusi batch jika sudah mencapai batchSize
                         if (toInsert.size + toUpdate.size >= batchSize) {
                             dbRoom.kendaraanDao().importData(toInsert, toUpdate)
                             toInsert.clear()
                             toUpdate.clear()
                         }
-
                     } while (cursor.moveToNext())
                 }
 
-                // Masukkan sisa data yang belum terproses
                 if (toInsert.isNotEmpty() || toUpdate.isNotEmpty()) {
                     dbRoom.kendaraanDao().importData(toInsert, toUpdate)
                 }
@@ -429,13 +416,9 @@ class SyncActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     finishSyncProgress(100, "Sinkron selesai")
                     Toast.makeText(this@SyncActivity, "Import selesai: $importCount data masuk", Toast.LENGTH_LONG).show()
-                    
-                    val prefs = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
-                    prefs.edit().putLong("last_server_version_code", versionCode).apply()
-
+                    getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE).edit().putLong("last_server_version_code", versionCode).apply()
                     saveSyncTime()
                 }
-
             } catch (e: Exception) {
                 Log.e("SyncActivity", "Error importSqliteUpdateToRoom", e)
                 withContext(Dispatchers.Main) {
@@ -449,101 +432,6 @@ class SyncActivity : AppCompatActivity() {
         }
     }
 
-    private fun startDataSync() {
-        Toast.makeText(this, "Sedang sinkron data Firebase...", Toast.LENGTH_SHORT).show()
-        lifecycleScope.launch {
-            try {
-                var adminCount = 0
-                var publicCount = 0
-                var noteCount = 0
-                val adminSnapshot = firestore.collection("admin_vehicles").whereEqualTo("status", "approved").get().await()
-                for (doc in adminSnapshot.documents) { if (upsertVehicle(doc)) adminCount++ }
-                val publicSnapshot = firestore.collection("public_vehicles").whereEqualTo("status", "approved").get().await()
-                for (doc in publicSnapshot.documents) { if (upsertVehicle(doc)) publicCount++ }
-                val noteSnapshot = firestore.collection("public_vehicle_notes").whereEqualTo("status", "approved").get().await()
-                for (doc in noteSnapshot.documents) { if (updateNote(doc)) noteCount++ }
-                Toast.makeText(this@SyncActivity, "Sinkron Firebase selesai", Toast.LENGTH_LONG).show()
-                saveSyncTime()
-            } catch (e: Exception) {
-                Toast.makeText(this@SyncActivity, "Gagal sinkron Firebase: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private suspend fun upsertVehicle(doc: DocumentSnapshot): Boolean {
-        val nopol = doc.getString("nopol") ?: return false
-        val leasing = doc.getString("leasing") ?: return false
-
-        val existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
-
-        val nama = doc.getString("namaKendaraan") ?: ""
-        val groupNumber = doc.getString("groupNumber") ?: extractGroup(nopol)
-        val tahun = doc.getString("tahun") ?: ""
-        val warna = doc.getString("warna") ?: ""
-        val rangka = doc.getString("noRangka") ?: ""
-        val mesin = doc.getString("noMesin") ?: ""
-        val cabang = doc.getString("cabang") ?: ""
-        val saldo = doc.getString("saldo") ?: ""
-        val overdue = doc.getString("overdue") ?: ""
-        val catatan = doc.getString("catatan") ?: ""
-
-        val searchKey = generateSearchKey(
-            nopol,
-            nama,
-            warna,
-            rangka,
-            mesin,
-            leasing,
-            cabang,
-            catatan
-        )
-
-        val k = Kendaraan(
-            id = existing?.id ?: 0,
-            nopol = nopol,
-            groupNumber = groupNumber,
-            namaKendaraan = nama,
-            tahun = tahun,
-            warna = warna,
-            noRangka = rangka,
-            noMesin = mesin,
-            leasing = leasing,
-            cabang = cabang,
-            saldo = saldo,
-            overdue = overdue,
-            catatan = catatan,
-            searchKey = searchKey,
-            editorName = doc.getString("publisherName") ?: existing?.editorName,
-            editorPhone = doc.getString("publisherPhone") ?: existing?.editorPhone
-        )
-
-        if (existing == null) {
-            dbRoom.kendaraanDao().insert(k)
-        } else {
-            dbRoom.kendaraanDao().update(k)
-        }
-
-        return true
-    }
-
-    private suspend fun updateNote(doc: DocumentSnapshot): Boolean {
-        val nopol = doc.getString("nopol") ?: return false
-        val leasing = doc.getString("leasing") ?: return false
-        val cabang = doc.getString("cabang") ?: ""
-        var existing = dbRoom.kendaraanDao().getKendaraanByNopolLeasingCabang(nopol, leasing, cabang)
-        if (existing == null) existing = dbRoom.kendaraanDao().getKendaraanByNopolAndLeasing(nopol, leasing)
-        if (existing != null) {
-            val updated = existing.copy(
-                catatan = doc.getString("noteText") ?: existing.catatan,
-                editorName = doc.getString("editorName") ?: existing.editorName,
-                editorPhone = doc.getString("editorPhone") ?: existing.editorPhone
-            )
-            dbRoom.kendaraanDao().update(updated)
-            return true
-        }
-        return false
-    }
-
     private fun extractGroup(nopol: String): String {
         val regex = "\\d+".toRegex()
         return regex.find(nopol)?.value ?: "0000"
@@ -551,8 +439,7 @@ class SyncActivity : AppCompatActivity() {
 
     private fun generateSearchKey(vararg fields: String): String {
         return fields.joinToString("") {
-            it.uppercase(Locale.getDefault())
-                .replace("[^A-Z0-9]".toRegex(), "")
+            it.uppercase(Locale.getDefault()).replace("[^A-Z0-9]".toRegex(), "")
         }
     }
 

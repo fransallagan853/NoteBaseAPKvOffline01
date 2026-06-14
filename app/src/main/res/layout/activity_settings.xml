@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
-        android:paddingTop="52dp"
+        android:paddingTop="16dp"
         android:paddingBottom="12dp"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -189,8 +189,7 @@
                 android:text="Preferensi"
                 android:textColor="@color/cyan_accent"
                 android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true"
+                android:textStyle="bold" android:textAllCaps="true"
                 android:letterSpacing="0.05" />
 
             <com.google.android.material.button.MaterialButton
@@ -207,32 +206,6 @@
                 android:paddingStart="10dp"
                 app:icon="@drawable/ic_settings"
                 app:iconTint="@color/gray_text" />
-
-            <!-- Manajemen Section
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text="Manajemen Data"
-                android:textColor="@color/cyan_accent"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnClearData"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="12dp"
-                android:text="Hapus Semua Data"
-                android:textColor="@color/red_delete"
-                app:strokeColor="@color/red_delete"
-                app:cornerRadius="12dp"
-                app:icon="@drawable/ic_delete"
-                app:iconTint="@color/red_delete" />
-                -->
 
             <!-- Tentang Section -->
             <TextView

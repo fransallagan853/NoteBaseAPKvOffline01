@@ -30,6 +30,7 @@ class NoteEditActivity : AppCompatActivity() {
         binding = ActivityNoteEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupSafeHeader()
         setupSafeBottomButton()
 
         db = AppDatabase.getDatabase(this)
@@ -49,6 +50,15 @@ class NoteEditActivity : AppCompatActivity() {
         }
 
         loadVehicleData()
+    }
+
+    private fun setupSafeHeader() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val extraPadding = (16 * resources.displayMetrics.density).toInt()
+            view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
+            insets
+        }
     }
 
     private fun setupSafeBottomButton() {

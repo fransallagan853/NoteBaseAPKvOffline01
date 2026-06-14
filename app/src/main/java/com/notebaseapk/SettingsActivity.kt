@@ -27,6 +27,7 @@ class SettingsActivity : AppCompatActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupSafeHeader()
         setupSafeBottomNav()
 
         db = AppDatabase.getDatabase(this)
@@ -37,6 +38,15 @@ class SettingsActivity : AppCompatActivity() {
         setupActions()
         setupBottomNav()
         updateUserUI()
+    }
+
+    private fun setupSafeHeader() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val extraPadding = (16 * resources.displayMetrics.density).toInt()
+            view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
+            insets
+        }
     }
 
     private fun setupSafeBottomNav() {
@@ -114,22 +124,5 @@ class SettingsActivity : AppCompatActivity() {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
         }
-
-        // binding.btnClearData.setOnClickListener {
-           //  showClearDataDialog()
-        // }
-    }
-
-    private fun showClearDataDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Hapus Semua Data")
-            .setMessage("Apakah Anda yakin ingin menghapus SEMUA data dari database? Tindakan ini tidak dapat dibatalkan.")
-            .setPositiveButton("Hapus") { _, _ ->
-                lifecycleScope.launch {
-                    db.kendaraanDao().deleteAll()
-                }
-            }
-            .setNegativeButton("Batal", null)
-            .show()
     }
 }

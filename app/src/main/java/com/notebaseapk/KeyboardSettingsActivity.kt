@@ -23,6 +23,7 @@ class KeyboardSettingsActivity : AppCompatActivity() {
 
         sharedPref = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
 
+        setupSafeHeader()
         setupSafeBottomButton()
         setupKeyboardLayoutSetting()
         setupKeyboardHeightSlider()
@@ -35,6 +36,15 @@ class KeyboardSettingsActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener {
             Toast.makeText(this, "Pengaturan keyboard disimpan", Toast.LENGTH_SHORT).show()
             finish()
+        }
+    }
+
+    private fun setupSafeHeader() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val extraPadding = (16 * resources.displayMetrics.density).toInt()
+            view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
+            insets
         }
     }
 

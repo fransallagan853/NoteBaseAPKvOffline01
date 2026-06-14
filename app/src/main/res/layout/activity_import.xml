@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
-        android:paddingTop="52dp"
+        android:paddingTop="16dp"
         android:paddingBottom="10dp"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -282,7 +282,6 @@
         android:background="@color/charcoal_bg"
         android:elevation="12dp"
         android:orientation="horizontal"
-        android:layout_marginBottom="48dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout

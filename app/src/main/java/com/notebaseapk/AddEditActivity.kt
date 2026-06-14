@@ -30,6 +30,7 @@ class AddEditActivity : AppCompatActivity() {
         binding = ActivityAddEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupSafeHeader()
         setupSafeSaveButton()
 
         db = AppDatabase.getDatabase(this)
@@ -44,6 +45,16 @@ class AddEditActivity : AppCompatActivity() {
         binding.btnBack.setOnClickListener { finish() }
         binding.btnSave.setOnClickListener { saveVehicle() }
     }
+
+    private fun setupSafeHeader() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val extraPadding = (16 * resources.displayMetrics.density).toInt()
+            view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
+            insets
+        }
+    }
+
     private fun setupCustomKeyboard() {
         customKeyboardManager = CustomKeyboardManager(
             activity = this,
@@ -73,6 +84,7 @@ class AddEditActivity : AppCompatActivity() {
             customKeyboardManager.refreshLayout()
         }
     }
+
     private fun setupSafeSaveButton() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.btnSave) { view, insets ->
             val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
@@ -85,6 +97,7 @@ class AddEditActivity : AppCompatActivity() {
             insets
         }
     }
+
     private fun loadVehicleData() {
         lifecycleScope.launch {
             db.kendaraanDao().getKendaraanById(vehicleId)?.let {
@@ -157,14 +170,7 @@ class AddEditActivity : AppCompatActivity() {
 
             val groupNumber = extractGroup(nopol)
             val searchKey = generateSearchKey(
-                nopol,
-                nama,
-                warna,
-                rangka,
-                mesin,
-                leasing,
-                cabang,
-                catatan
+                nopol, nama, warna, rangka, mesin, leasing, cabang, catatan
             )
             val kendaraan = Kendaraan(
                 id = if (vehicleId == -1) 0 else vehicleId,
@@ -185,14 +191,9 @@ class AddEditActivity : AppCompatActivity() {
                 editorPhone = publisherPhone
             )
 
-            // Simpan Lokal
-            if (vehicleId == -1) {
-                db.kendaraanDao().insert(kendaraan)
-            } else {
-                db.kendaraanDao().update(kendaraan)
-            }
+            if (vehicleId == -1) db.kendaraanDao().insert(kendaraan)
+            else db.kendaraanDao().update(kendaraan)
 
-            // Simpan ke Firestore jika Publish
             if (isPublish) {
                 val publicData = hashMapOf(
                     "nopol" to nopol,
@@ -223,15 +224,13 @@ class AddEditActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this@AddEditActivity, "Data disimpan secara privat", Toast.LENGTH_SHORT).show()
             }
-
             finish()
         }
     }
 
     private fun extractGroup(nopol: String): String {
         val regex = "\\d+".toRegex()
-        val match = regex.find(nopol)
-        return match?.value ?: "0000"
+        return regex.find(nopol)?.value ?: "0000"
     }
 
     private fun generateSearchKey(vararg fields: String): String {

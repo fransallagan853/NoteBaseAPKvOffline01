@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 *.iml
 .gradle
 /local.properties
@@ -14,7 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
-=======
+
 # Gradle files
 .gradle/
 build/
@@ -44,9 +43,8 @@ render.experimental.xml
 *.jks
 *.keystore
 
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
 # Android Profiling
 *.hprof
->>>>>>> 9d91df886cba84a6ec4b8e34dfcbf2876b1b37af
+
+# Firebase/Google Services
+google-services.json

@@ -28,6 +28,7 @@ class FavoriteActivity : AppCompatActivity() {
 
         db = AppDatabase.getDatabase(this)
 
+        setupSafeHeader()
         setupSafeBottomNav()
         setupRecyclerView()
         setupBottomNav()
@@ -38,14 +39,21 @@ class FavoriteActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupSafeHeader() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val extraPadding = (16 * resources.displayMetrics.density).toInt()
+            view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
+            insets
+        }
+    }
+
     private fun setupSafeBottomNav() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
             val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-
             val params = view.layoutParams as ConstraintLayout.LayoutParams
             params.bottomMargin = navBarHeight
             view.layoutParams = params
-
             insets
         }
     }
@@ -86,10 +94,6 @@ class FavoriteActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(0, 0)
             finish()
-        }
-
-        binding.menuFavorite.setOnClickListener {
-            // Sudah di halaman Favorit
         }
 
         binding.menuSync.setOnClickListener {
