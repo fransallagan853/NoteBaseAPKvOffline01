@@ -131,8 +131,6 @@ class MainActivity : AppCompatActivity() {
                         nopolAdapter.updateData(NopolFormatter.sortList(it))
                     }
                 }
-
-                // 5 angka ke atas / huruf campur angka = searchKey bebas
                 else -> {
                     binding.tvSearchLabel.visibility = View.VISIBLE
                     binding.tvSearchLabel.text = "Hasil Data"
@@ -140,8 +138,35 @@ class MainActivity : AppCompatActivity() {
 
                     val normalized = normalizeSearchText(cleanQuery)
 
-                    db.kendaraanDao().searchKendaraanSpesifik(normalized).collectLatest {
-                        nopolAdapter.updateData(NopolFormatter.sortList(it))
+                    val nopolPattern = Regex("^(\\d{1,4})([A-Z]{1,3})$")
+                    val nopolMatch = nopolPattern.matchEntire(normalized)
+
+                    if (nopolMatch != null) {
+                        val angkaPart = nopolMatch.groupValues[1]
+                        val hurufPart = nopolMatch.groupValues[2]
+
+                        val angkaRapi = angkaPart.padStart(4, '0')
+                        val targetNopolKey = angkaRapi + hurufPart
+
+                        db.kendaraanDao().getKendaraanByGroup(angkaPart, "").collectLatest { list ->
+                            val filtered = list.filter { kendaraan ->
+                                val displayKey = normalizeSearchText(
+                                    NopolFormatter.display(kendaraan.nopol)
+                                )
+
+                                val rawKey = normalizeSearchText(kendaraan.nopol)
+
+                                displayKey.contains(targetNopolKey) ||
+                                        rawKey.contains(targetNopolKey) ||
+                                        rawKey.contains(normalized)
+                            }
+
+                            nopolAdapter.updateData(NopolFormatter.sortList(filtered))
+                        }
+                    } else {
+                        db.kendaraanDao().searchKendaraanSpesifik(normalized).collectLatest {
+                            nopolAdapter.updateData(NopolFormatter.sortList(it))
+                        }
                     }
                 }
             }

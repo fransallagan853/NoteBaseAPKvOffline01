@@ -33,6 +33,18 @@ interface KendaraanDao {
 """)
     fun getKendaraanByGroup(groupNumber: String, filter: String): Flow<List<Kendaraan>>
 
+    @Query("""
+    SELECT * FROM kendaraan
+    WHERE UPPER(
+        REPLACE(
+            REPLACE(
+                REPLACE(nopol, ' ', ''),
+            '-', ''),
+        '.', '')
+    ) LIKE '%' || :normalizedNopol || '%'
+    ORDER BY nopol ASC
+""")
+    fun searchKendaraanByNopolOnly(normalizedNopol: String): Flow<List<Kendaraan>>
     @Query("SELECT * FROM kendaraan WHERE searchKey LIKE '%' || :normalizedKeyword || '%' ORDER BY nopol ASC")
     fun searchKendaraanSpesifik(normalizedKeyword: String): Flow<List<Kendaraan>>
 
