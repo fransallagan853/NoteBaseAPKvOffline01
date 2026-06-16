@@ -18,6 +18,12 @@ interface FavoriteVehicleDao {
     ORDER BY f.createdAt DESC
 """)
     fun getFavoriteKendaraanList(): Flow<List<Kendaraan>>
+    @Query("""
+    SELECT * FROM kendaraan
+    WHERE TRIM(catatan) != ''
+    ORDER BY nopol ASC
+""")
+    fun getCatatanKendaraanList(): Flow<List<Kendaraan>>
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertFavorite(favorite: FavoriteVehicle)
 
