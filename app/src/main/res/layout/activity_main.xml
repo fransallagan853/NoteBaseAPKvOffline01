@@ -74,7 +74,7 @@
             android:drawableStart="@android:drawable/ic_menu_search"
             android:drawablePadding="14dp"
             android:drawableTint="@color/gray_text"
-            android:hint="Cari nopol, kendaraan, leasing..."
+            android:hint="Cari nopol, kendaraan, leasing, NoRangka, NoMesin..."
             android:inputType="textCapCharacters|textNoSuggestions"
             android:imeOptions="actionSearch"
             android:paddingHorizontal="16dp"

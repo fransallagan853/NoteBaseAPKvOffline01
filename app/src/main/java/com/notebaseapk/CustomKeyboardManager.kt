@@ -10,6 +10,8 @@ import android.widget.EditText
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import android.util.TypedValue
+import android.widget.TextView
 
 class CustomKeyboardManager(
     private val activity: Activity,
@@ -82,6 +84,7 @@ class CustomKeyboardManager(
         val view = LayoutInflater.from(activity).inflate(layoutRes, keyboardContainer, true)
 
         applyKeyboardHeightScale(view)
+        applyKeyboardTextSize(view)
 
         val buttonIds = listOf(
             R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4,
@@ -139,6 +142,28 @@ class CustomKeyboardManager(
         }
 
         scaleView(root)
+    }
+    private fun applyKeyboardTextSize(root: View) {
+        fun scaleText(view: View) {
+            if (view is TextView) {
+                val text = view.text?.toString() ?: ""
+
+                val sizeSp = when {
+                    text.length == 1 -> 22f   // Huruf & angka
+                    else -> 16f              // SPASI, TUTUP, tombol panjang
+                }
+
+                view.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+            }
+
+            if (view is ViewGroup) {
+                for (i in 0 until view.childCount) {
+                    scaleText(view.getChildAt(i))
+                }
+            }
+        }
+
+        scaleText(root)
     }
     private fun appendText(value: String) {
         val editText = activeEditText ?: return
