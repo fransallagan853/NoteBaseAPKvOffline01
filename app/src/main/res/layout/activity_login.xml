@@ -36,7 +36,7 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnGoogleSignIn"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="80dp"
         android:layout_marginTop="48dp"
         android:text="Masuk/Daftar dengan Google"
         android:textAllCaps="false"
