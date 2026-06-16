@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.notebaseapk.data.Kendaraan
 import com.notebaseapk.databinding.ItemNopolCompactBinding
+import com.notebaseapk.util.NopolFormatter
 
 class NopolAdapter(
     private var list: List<Kendaraan>,
@@ -31,7 +32,7 @@ class NopolAdapter(
 
     inner class NopolViewHolder(private val binding: ItemNopolCompactBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Kendaraan) {
-            binding.tvNopol.text = item.nopol
+            binding.tvNopol.text = NopolFormatter.display(item.nopol)
             
             val details = mutableListOf<String>()
             if (!item.namaKendaraan.isNullOrEmpty()) details.add(item.namaKendaraan)

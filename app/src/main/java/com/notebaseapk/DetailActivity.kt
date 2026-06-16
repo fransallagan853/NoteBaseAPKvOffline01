@@ -18,6 +18,7 @@ import com.notebaseapk.data.FavoriteVehicle
 import com.notebaseapk.data.Kendaraan
 import com.notebaseapk.databinding.ActivityDetailBinding
 import kotlinx.coroutines.launch
+import com.notebaseapk.util.NopolFormatter
 
 class DetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailBinding
@@ -68,7 +69,7 @@ class DetailActivity : AppCompatActivity() {
             kendaraan = db.kendaraanDao().getKendaraanById(vehicleId)
 
             kendaraan?.let {
-                binding.tvNopol.text = it.nopol
+                binding.tvNopol.text = NopolFormatter.display(it.nopol)
                 binding.tvNamaKendaraan.text = it.namaKendaraan
                 binding.tvTahun.text = it.tahun.ifEmpty { "-" }
                 binding.tvWarna.text = it.warna.ifEmpty { "-" }
@@ -172,7 +173,7 @@ class DetailActivity : AppCompatActivity() {
         var text = """
             noteBase - Detail Data
 
-            Nomor Polisi: ${it.nopol}
+            Nomor Polisi: ${'$'}{NopolFormatter.display(it.nopol)}
             Kendaraan: ${it.namaKendaraan}
             Tahun: ${it.tahun.ifEmpty { "-" }}
             Warna: ${it.warna.ifEmpty { "-" }}
