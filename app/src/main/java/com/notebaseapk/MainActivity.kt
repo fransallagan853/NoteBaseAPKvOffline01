@@ -17,6 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Locale
+import com.notebaseapk.util.NopolFormatter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -127,7 +128,7 @@ class MainActivity : AppCompatActivity() {
                     binding.rvGroup.adapter = nopolAdapter
 
                     db.kendaraanDao().getKendaraanByGroup(cleanQuery, "").collectLatest {
-                        nopolAdapter.updateData(it)
+                        nopolAdapter.updateData(NopolFormatter.sortList(it))
                     }
                 }
 
@@ -140,7 +141,7 @@ class MainActivity : AppCompatActivity() {
                     val normalized = normalizeSearchText(cleanQuery)
 
                     db.kendaraanDao().searchKendaraanSpesifik(normalized).collectLatest {
-                        nopolAdapter.updateData(it)
+                        nopolAdapter.updateData(NopolFormatter.sortList(it))
                     }
                 }
             }
