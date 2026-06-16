@@ -93,26 +93,52 @@ class MainActivity : AppCompatActivity() {
     private fun performSearch(query: String) {
         searchJob?.cancel()
         searchJob = lifecycleScope.launch {
-            if (query.isBlank()) {
+            val cleanQuery = query.trim()
+
+            if (cleanQuery.isBlank()) {
                 binding.tvSearchLabel.visibility = View.GONE
                 binding.rvGroup.adapter = groupAdapter
+
                 db.kendaraanDao().getGroupNopol("").collectLatest {
                     groupAdapter.updateData(it)
                 }
-            } else {
-                val isNumeric = query.all { it.isDigit() }
-                if (isNumeric && query.length < 4) {
+
+                return@launch
+            }
+
+            val isNumeric = cleanQuery.all { it.isDigit() }
+
+            when {
+                // 1-3 angka = tetap tampil group
+                isNumeric && cleanQuery.length < 4 -> {
                     binding.tvSearchLabel.visibility = View.VISIBLE
                     binding.tvSearchLabel.text = "Hasil Group"
                     binding.rvGroup.adapter = groupAdapter
-                    db.kendaraanDao().getGroupNopol(query).collectLatest {
+
+                    db.kendaraanDao().getGroupNopol(cleanQuery).collectLatest {
                         groupAdapter.updateData(it)
                     }
-                } else {
+                }
+
+                // 4 angka = khusus data nopol group itu saja
+                isNumeric && cleanQuery.length == 4 -> {
                     binding.tvSearchLabel.visibility = View.VISIBLE
                     binding.tvSearchLabel.text = "Hasil Data"
                     binding.rvGroup.adapter = nopolAdapter
-                    val normalized = normalizeSearchText(query)
+
+                    db.kendaraanDao().getKendaraanByGroup(cleanQuery, "").collectLatest {
+                        nopolAdapter.updateData(it)
+                    }
+                }
+
+                // 5 angka ke atas / huruf campur angka = searchKey bebas
+                else -> {
+                    binding.tvSearchLabel.visibility = View.VISIBLE
+                    binding.tvSearchLabel.text = "Hasil Data"
+                    binding.rvGroup.adapter = nopolAdapter
+
+                    val normalized = normalizeSearchText(cleanQuery)
+
                     db.kendaraanDao().searchKendaraanSpesifik(normalized).collectLatest {
                         nopolAdapter.updateData(it)
                     }
