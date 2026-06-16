@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity() {
         setupFab()
         setupMenu()
         setupBottomNav()
-        observeStats()
         
         performSearch("")
     }
@@ -219,13 +218,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeStats() {
-        lifecycleScope.launch {
-            db.kendaraanDao().getCount().collectLatest { count ->
-                binding.tvTotalData.text = "$count Data Tersimpan"
-            }
-        }
-    }
 
     override fun onResume() {
         super.onResume()

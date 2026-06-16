@@ -34,7 +34,6 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.btnBack.setOnClickListener { finish() }
 
-        observeData()
         setupActions()
         setupBottomNav()
         updateUserUI()
@@ -100,13 +99,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeData() {
-        lifecycleScope.launch {
-            db.kendaraanDao().getCount().collectLatest { count ->
-                binding.tvTotalData.text = "$count Data Tersimpan"
-            }
-        }
-    }
+
 
     private fun setupActions() {
         binding.btnKeyboardSettings.setOnClickListener {

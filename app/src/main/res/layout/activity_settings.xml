@@ -135,52 +135,6 @@
                 app:backgroundTint="@color/charcoal_bg"
                 app:cornerRadius="12dp" />
 
-            <!-- Statistik Section -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="Statistik Database"
-                android:textColor="@color/cyan_accent"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                app:cardBackgroundColor="@color/charcoal_bg"
-                app:cardCornerRadius="16dp"
-                app:strokeWidth="0dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Total Data Tersimpan"
-                        android:textColor="@color/gray_text"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tvTotalData"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="0 Data"
-                        android:textColor="@color/white_text"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
             <!-- Preferensi Section -->
             <TextView
                 android:layout_width="wrap_content"
@@ -207,7 +161,7 @@
                 app:icon="@drawable/ic_settings"
                 app:iconTint="@color/gray_text" />
 
-            <!-- Tentang Section -->
+            <!-- Info APK Section -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
