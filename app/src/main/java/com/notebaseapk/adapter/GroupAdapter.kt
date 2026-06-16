@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.notebaseapk.data.GroupNopol
 import com.notebaseapk.databinding.ItemNopolGroupBinding
+import com.notebaseapk.util.NopolFormatter
 
 class GroupAdapter(
     private var groups: List<GroupNopol>,
@@ -30,7 +31,7 @@ class GroupAdapter(
 
     inner class GroupViewHolder(private val binding: ItemNopolGroupBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(group: GroupNopol) {
-            binding.tvGroupNumber.text = group.groupNumber
+            binding.tvGroupNumber.text = NopolFormatter.formatGroupNumber(group.groupNumber)
             binding.tvJumlah.text = "${group.jumlah} data"
             binding.root.setOnClickListener { onItemClick(group) }
         }

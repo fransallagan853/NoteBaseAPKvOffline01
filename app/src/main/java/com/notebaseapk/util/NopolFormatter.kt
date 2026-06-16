@@ -46,13 +46,11 @@ object NopolFormatter {
             .sortedWith(
                 compareBy<Pair<Kendaraan, NopolPart>> { it.second.wilayah }
                     .thenBy { it.second.angkaSort }
-                    .thenBy { it.second.angkaText }
                     .thenBy { it.second.seri }
                     .thenBy { it.second.fallback }
             )
             .map { it.first }
     }
-
     private fun parse(raw: String): NopolPart? {
         val clean = normalize(raw)
 
@@ -60,15 +58,24 @@ object NopolFormatter {
             .matchEntire(clean)
             ?: return null
 
-        val angkaText = match.groupValues[2]
+        val angkaAsli = match.groupValues[2]
+        val angkaRapi = angkaAsli.padStart(4, '0')
 
         return NopolPart(
             wilayah = match.groupValues[1],
-            angkaText = angkaText,
-            angkaSort = angkaText.toIntOrNull() ?: Int.MAX_VALUE,
+            angkaText = angkaRapi,
+            angkaSort = angkaAsli.toIntOrNull() ?: Int.MAX_VALUE,
             seri = match.groupValues[3],
             fallback = clean
         )
+    }
+
+    fun formatGroupNumber(raw: String): String {
+        val digits = raw.trim().filter { it.isDigit() }
+
+        if (digits.isBlank()) return raw.trim()
+
+        return digits.padStart(4, '0')
     }
 
     private fun normalize(raw: String): String {

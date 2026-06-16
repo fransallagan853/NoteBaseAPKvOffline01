@@ -11,10 +11,26 @@ interface KendaraanDao {
     @Query("SELECT * FROM kendaraan")
     suspend fun getAllKendaraanList(): List<Kendaraan>
 
-    @Query("SELECT groupNumber, COUNT(*) as jumlah FROM kendaraan WHERE groupNumber LIKE :keyword || '%' GROUP BY groupNumber ORDER BY groupNumber ASC")
+    @Query("""
+    SELECT 
+        printf('%04d', CAST(groupNumber AS INTEGER)) AS groupNumber,
+        COUNT(*) as jumlah
+    FROM kendaraan
+    WHERE 
+        :keyword = ''
+        OR printf('%04d', CAST(groupNumber AS INTEGER)) LIKE :keyword || '%'
+        OR groupNumber LIKE :keyword || '%'
+    GROUP BY CAST(groupNumber AS INTEGER)
+    ORDER BY CAST(groupNumber AS INTEGER) ASC
+""")
     fun getGroupNopol(keyword: String): Flow<List<GroupNopol>>
 
-    @Query("SELECT * FROM kendaraan WHERE groupNumber = :groupNumber AND searchKey LIKE '%' || :filter || '%' ORDER BY nopol ASC")
+    @Query("""
+    SELECT * FROM kendaraan 
+    WHERE CAST(groupNumber AS INTEGER) = CAST(:groupNumber AS INTEGER)
+    AND searchKey LIKE '%' || :filter || '%'
+    ORDER BY nopol ASC
+""")
     fun getKendaraanByGroup(groupNumber: String, filter: String): Flow<List<Kendaraan>>
 
     @Query("SELECT * FROM kendaraan WHERE searchKey LIKE '%' || :normalizedKeyword || '%' ORDER BY nopol ASC")
