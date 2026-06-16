@@ -74,7 +74,6 @@ class KeyboardSettingsActivity : AppCompatActivity() {
 
             if (::customKeyboardManager.isInitialized) {
                 customKeyboardManager.refreshLayout()
-                binding.etKeyboardPreview.requestFocus()
             }
         }
     }
@@ -101,7 +100,6 @@ class KeyboardSettingsActivity : AppCompatActivity() {
 
                 if (::customKeyboardManager.isInitialized) {
                     customKeyboardManager.refreshLayout()
-                    binding.etKeyboardPreview.requestFocus()
                 }
             }
 
@@ -127,7 +125,9 @@ class KeyboardSettingsActivity : AppCompatActivity() {
             listOf(binding.etKeyboardPreview)
         )
 
-        binding.etKeyboardPreview.requestFocus()
+        binding.root.requestFocus()
+        binding.etKeyboardPreview.clearFocus()
+        customKeyboardManager.hideKeyboard()
     }
 
     private fun setupSafeBottomButton() {
