@@ -170,10 +170,12 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun buildShareText(it: Kendaraan): String {
+        val formattedNopol = NopolFormatter.display(it.nopol)
+
         var text = """
             noteBase - Detail Data
 
-            Nomor Polisi: ${'$'}{NopolFormatter.display(it.nopol)}
+            Nomor Polisi: $formattedNopol
             Kendaraan: ${it.namaKendaraan}
             Tahun: ${it.tahun.ifEmpty { "-" }}
             Warna: ${it.warna.ifEmpty { "-" }}
