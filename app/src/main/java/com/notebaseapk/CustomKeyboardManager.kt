@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
@@ -32,11 +33,21 @@ class CustomKeyboardManager(
     private val mainHandler = Handler(Looper.getMainLooper())
     private var lifecycleObserverAdded = false
 
+    private val alphaScaleKey = "keyboard_alpha_height_scale"
+    private val numericScaleKey = "keyboard_numeric_height_scale"
+
+    private val defaultAlphaScale = 1.16f
+    private val defaultNumericScale = 1.33f
+
+    private val minRowScale = 0.90f
+    private val maxRowScale = 1.70f
+    private val stepRowScale = 0.05f
+
     fun setup(editTexts: List<EditText>) {
         registeredEditTexts.clear()
         registeredEditTexts.addAll(editTexts)
 
-        activity.window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+        activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 
         setupLifecycleObserver()
         applyKeyboardBottomInset()
@@ -213,7 +224,7 @@ class CustomKeyboardManager(
 
         val closeBar = LinearLayout(activity).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.END
+            gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(4), dp(2), dp(4), dp(4))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -221,8 +232,34 @@ class CustomKeyboardManager(
             )
         }
 
+        closeBar.addView(createShortcutButton("ABC−") {
+            changeRowScale(alphaScaleKey, defaultAlphaScale, -stepRowScale)
+        })
+
+        closeBar.addView(createShortcutButton("ABC+") {
+            changeRowScale(alphaScaleKey, defaultAlphaScale, stepRowScale)
+        })
+
+        closeBar.addView(createShortcutButton("123−") {
+            changeRowScale(numericScaleKey, defaultNumericScale, -stepRowScale)
+        })
+
+        closeBar.addView(createShortcutButton("123+") {
+            changeRowScale(numericScaleKey, defaultNumericScale, stepRowScale)
+        })
+
+        closeBar.addView(
+            View(activity).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    1,
+                    1f
+                )
+            }
+        )
+
         val btnCloseKeyboard = TextView(activity).apply {
-            text = "TUTUP KEYBOARD  ✕"
+            text = "TUTUP  ✕"
             setTextColor(ContextCompat.getColor(activity, R.color.cyan_accent))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
             typeface = Typeface.DEFAULT_BOLD
@@ -236,7 +273,9 @@ class CustomKeyboardManager(
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            )
+            ).apply {
+                marginStart = dp(4)
+            }
 
             setOnClickListener {
                 hideKeyboard()
@@ -252,8 +291,8 @@ class CustomKeyboardManager(
         keyboardContainer.addView(wrapper)
 
         applyKeyboardHeightScale(keyboardView)
-        applyNumericRowExtraHeight(keyboardView)
-        applyAlphaRowExtraHeight(keyboardView)
+        applyNumericRowScale(keyboardView)
+        applyAlphaRowScale(keyboardView)
         applyKeyboardTextSize(keyboardView)
 
         val buttonIds = listOf(
@@ -337,6 +376,52 @@ class CustomKeyboardManager(
         }
     }
 
+    private fun createShortcutButton(textValue: String, onClick: () -> Unit): TextView {
+        return TextView(activity).apply {
+            text = textValue
+            setTextColor(ContextCompat.getColor(activity, R.color.white_text))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            includeFontPadding = false
+            setPadding(dp(8), dp(7), dp(8), dp(7))
+            setBackgroundResource(R.drawable.bg_keyboard_button)
+            isClickable = true
+            isFocusable = true
+
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                marginEnd = dp(4)
+            }
+
+            setOnClickListener {
+                onClick()
+            }
+        }
+    }
+
+    private fun changeRowScale(key: String, defaultValue: Float, delta: Float) {
+        val prefs = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
+        val current = prefs.getFloat(key, defaultValue)
+
+        val next = (current + delta)
+            .coerceIn(minRowScale, maxRowScale)
+
+        prefs.edit()
+            .putFloat(key, next)
+            .apply()
+
+        setupKeyboardLayout()
+        keyboardContainer.visibility = View.VISIBLE
+
+        activeEditText?.let {
+            it.requestFocus()
+            forceHideAndroidKeyboard(it)
+        }
+    }
+
     private fun applyKeyboardHeightScale(root: View) {
         val prefs = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
         val scale = prefs.getFloat("keyboard_height_scale", 1.0f)
@@ -359,8 +444,9 @@ class CustomKeyboardManager(
         scaleView(root)
     }
 
-    private fun applyNumericRowExtraHeight(root: View) {
-        val extraHeight = (14 * root.resources.displayMetrics.density).toInt()
+    private fun applyNumericRowScale(root: View) {
+        val prefs = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
+        val scale = prefs.getFloat(numericScaleKey, defaultNumericScale)
 
         val numericRowIds = setOf(
             R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4,
@@ -382,7 +468,7 @@ class CustomKeyboardManager(
                 val params = view.layoutParams
 
                 if (params != null && params.height > 0 && hasDirectNumericButton(view)) {
-                    params.height += extraHeight
+                    params.height = (params.height * scale).toInt()
                     view.layoutParams = params
                 }
 
@@ -395,8 +481,9 @@ class CustomKeyboardManager(
         apply(root)
     }
 
-    private fun applyAlphaRowExtraHeight(root: View) {
-        val extraHeight = (6 * root.resources.displayMetrics.density).toInt()
+    private fun applyAlphaRowScale(root: View) {
+        val prefs = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
+        val scale = prefs.getFloat(alphaScaleKey, defaultAlphaScale)
 
         val alphaRowIds = setOf(
             R.id.btnQ, R.id.btnW, R.id.btnE, R.id.btnR, R.id.btnT,
@@ -424,7 +511,7 @@ class CustomKeyboardManager(
                 val params = view.layoutParams
 
                 if (params != null && params.height > 0 && hasDirectAlphaButton(view)) {
-                    params.height += extraHeight
+                    params.height = (params.height * scale).toInt()
                     view.layoutParams = params
                 }
 
