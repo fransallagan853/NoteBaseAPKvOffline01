@@ -203,9 +203,13 @@ class SyncActivity : AppCompatActivity() {
     private suspend fun checkServerUpdate() {
         try {
             updateSyncProgress(10, "Mengecek update server...")
+
+            val prefs = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
+            val lastImportedVersion = prefs.getLong("last_server_version_code", 0L)
+
             val resultText = withContext(Dispatchers.IO) {
                 val request = Request.Builder()
-                    .url("http://192.168.18.34:5000/api/update/latest")
+                    .url("http://192.168.18.34:5000/api/update/latest?lastVersion=$lastImportedVersion")
                     .build()
 
                 okHttpClient.newCall(request).execute().use { response ->
@@ -217,28 +221,26 @@ class SyncActivity : AppCompatActivity() {
             val json = JSONObject(resultText)
             val data = json.optJSONObject("data") ?: throw Exception("Data update tidak ditemukan")
 
+            val updateType = data.optString("updateType", "")
             val versionCode = data.optLong("versionCode", 0L)
             val totalRows = data.optInt("totalRows", 0)
             val gzipFile = data.optString("gzipFile", "")
-            updateSyncProgress(20, "Update ditemukan: $totalRows data")
 
-            if (gzipFile.isEmpty()) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@SyncActivity, "Tidak ada file update di server", Toast.LENGTH_SHORT).show()
-                }
-                return
-            }
-
-            val prefs = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
-            val lastImportedVersion = prefs.getLong("last_server_version_code", 0L)
-
-            if (versionCode != 0L && versionCode == lastImportedVersion) {
+            if (updateType == "none" || gzipFile.isEmpty()) {
                 withContext(Dispatchers.Main) {
                     finishSyncProgress(100, "Data sudah versi terbaru")
                     Toast.makeText(this@SyncActivity, "Data sudah versi terbaru", Toast.LENGTH_SHORT).show()
                 }
                 return
             }
+
+            val statusText = when (updateType) {
+                "full" -> "Full update ditemukan: $totalRows data"
+                "delta" -> "Delta update ditemukan: $totalRows data"
+                else -> "Update ditemukan: $totalRows data"
+            }
+
+            updateSyncProgress(20, statusText)
 
             downloadAndExtractUpdate(gzipFile, totalRows, versionCode)
 
