@@ -23,6 +23,7 @@ class KeyboardSettingsActivity : AppCompatActivity() {
 
         sharedPref = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
 
+        cleanOldKeyboardLayoutValue()
         setupSafeHeader()
         setupSafeBottomButton()
         setupKeyboardLayoutSetting()
@@ -39,11 +40,26 @@ class KeyboardSettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun cleanOldKeyboardLayoutValue() {
+        val currentLayout = sharedPref.getString("keyboard_layout", "default") ?: "default"
+
+        if (currentLayout != "default" && currentLayout != "qwerty_numpad") {
+            sharedPref.edit()
+                .putString("keyboard_layout", "default")
+                .apply()
+        }
+    }
+
     private fun setupSafeHeader() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
             val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
             val extraPadding = (16 * resources.displayMetrics.density).toInt()
-            view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
+            view.setPadding(
+                view.paddingLeft,
+                statusBarHeight + extraPadding,
+                view.paddingRight,
+                view.paddingBottom
+            )
             insets
         }
     }
@@ -52,19 +68,14 @@ class KeyboardSettingsActivity : AppCompatActivity() {
         val currentLayout = sharedPref.getString("keyboard_layout", "default") ?: "default"
 
         when (currentLayout) {
-            "default" -> binding.rbDefault.isChecked = true
-            "qwerty_numpad" -> binding.rbQwertyNumpad.isChecked = true
-            "numpad_top" -> binding.rbNumpadTop.isChecked = true
-            "numpad_bottom" -> binding.rbNumpadBottom.isChecked = true
+            "qwerty_numpad" -> binding.rbDefault2.isChecked = true
             else -> binding.rbDefault.isChecked = true
         }
 
         binding.rgKeyboardLayout.setOnCheckedChangeListener { _, checkedId ->
             val layoutValue = when (checkedId) {
                 binding.rbDefault.id -> "default"
-                binding.rbQwertyNumpad.id -> "qwerty_numpad"
-                binding.rbNumpadTop.id -> "numpad_top"
-                binding.rbNumpadBottom.id -> "numpad_bottom"
+                binding.rbDefault2.id -> "qwerty_numpad"
                 else -> "default"
             }
 
@@ -74,6 +85,7 @@ class KeyboardSettingsActivity : AppCompatActivity() {
 
             if (::customKeyboardManager.isInitialized) {
                 customKeyboardManager.refreshLayout()
+                binding.etKeyboardPreview.clearFocus()
             }
         }
     }
@@ -100,6 +112,7 @@ class KeyboardSettingsActivity : AppCompatActivity() {
 
                 if (::customKeyboardManager.isInitialized) {
                     customKeyboardManager.refreshLayout()
+                    binding.etKeyboardPreview.clearFocus()
                 }
             }
 
