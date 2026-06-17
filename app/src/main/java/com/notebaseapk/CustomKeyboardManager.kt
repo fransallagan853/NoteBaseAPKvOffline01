@@ -3,25 +3,45 @@ package com.notebaseapk
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Typeface
+import android.os.Handler
+import android.os.Looper
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 
 class CustomKeyboardManager(
     private val activity: Activity,
     private val keyboardContainer: ViewGroup
 ) {
     private var activeEditText: EditText? = null
+    private val registeredEditTexts = mutableListOf<EditText>()
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var lifecycleObserverAdded = false
 
     fun setup(editTexts: List<EditText>) {
+        registeredEditTexts.clear()
+        registeredEditTexts.addAll(editTexts)
+
+        activity.window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+
+        setupLifecycleObserver()
         applyKeyboardBottomInset()
         setupKeyboardLayout()
+        disableAndroidKeyboardForAllFields()
 
         editTexts.forEach { editText ->
             editText.showSoftInputOnFocus = false
@@ -29,7 +49,16 @@ class CustomKeyboardManager(
             editText.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
                     activeEditText = editText
+                    forceHideAndroidKeyboard(editText)
                     keyboardContainer.visibility = View.VISIBLE
+
+                    mainHandler.postDelayed({
+                        forceHideAndroidKeyboard(editText)
+                    }, 120)
+
+                    mainHandler.postDelayed({
+                        forceHideAndroidKeyboard(editText)
+                    }, 350)
                 }
             }
 
@@ -37,7 +66,16 @@ class CustomKeyboardManager(
                 if (event.action == MotionEvent.ACTION_UP) {
                     activeEditText = editText
                     v.requestFocus()
+                    forceHideAndroidKeyboard(editText)
                     keyboardContainer.visibility = View.VISIBLE
+
+                    mainHandler.postDelayed({
+                        forceHideAndroidKeyboard(editText)
+                    }, 120)
+
+                    mainHandler.postDelayed({
+                        forceHideAndroidKeyboard(editText)
+                    }, 350)
                 }
                 false
             }
@@ -46,11 +84,84 @@ class CustomKeyboardManager(
 
     fun refreshLayout() {
         setupKeyboardLayout()
+        disableAndroidKeyboardForAllFields()
+        activeEditText?.let {
+            forceHideAndroidKeyboard(it)
+        }
     }
 
     fun hideKeyboard() {
         keyboardContainer.visibility = View.GONE
-        activeEditText?.clearFocus()
+        activeEditText?.let {
+            forceHideAndroidKeyboard(it)
+            it.clearFocus()
+        }
+    }
+
+    private fun setupLifecycleObserver() {
+        if (lifecycleObserverAdded) return
+
+        if (activity is LifecycleOwner) {
+            activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
+                override fun onResume(owner: LifecycleOwner) {
+                    disableAndroidKeyboardForAllFields()
+
+                    mainHandler.postDelayed({
+                        val editText = activeEditText
+
+                        if (editText != null && editText.hasFocus()) {
+                            forceHideAndroidKeyboard(editText)
+                            keyboardContainer.visibility = View.VISIBLE
+                        } else {
+                            forceHideAndroidKeyboard()
+                        }
+                    }, 80)
+
+                    mainHandler.postDelayed({
+                        val editText = activeEditText
+
+                        if (editText != null && editText.hasFocus()) {
+                            forceHideAndroidKeyboard(editText)
+                            keyboardContainer.visibility = View.VISIBLE
+                        } else {
+                            forceHideAndroidKeyboard()
+                        }
+                    }, 300)
+
+                    mainHandler.postDelayed({
+                        val editText = activeEditText
+
+                        if (editText != null && editText.hasFocus()) {
+                            forceHideAndroidKeyboard(editText)
+                            keyboardContainer.visibility = View.VISIBLE
+                        } else {
+                            forceHideAndroidKeyboard()
+                        }
+                    }, 600)
+                }
+
+                override fun onPause(owner: LifecycleOwner) {
+                    forceHideAndroidKeyboard()
+                }
+            })
+
+            lifecycleObserverAdded = true
+        }
+    }
+
+    private fun disableAndroidKeyboardForAllFields() {
+        registeredEditTexts.forEach { editText ->
+            editText.showSoftInputOnFocus = false
+        }
+    }
+
+    private fun forceHideAndroidKeyboard(view: View? = activity.currentFocus) {
+        try {
+            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val targetView = view ?: activity.currentFocus ?: keyboardContainer
+            imm.hideSoftInputFromWindow(targetView.windowToken, 0)
+        } catch (_: Exception) {
+        }
     }
 
     private fun applyKeyboardBottomInset() {
@@ -91,12 +202,59 @@ class CustomKeyboardManager(
         }
 
         keyboardContainer.removeAllViews()
-        val view = LayoutInflater.from(activity).inflate(layoutRes, keyboardContainer, true)
 
-        applyKeyboardHeightScale(view)
-        applyNumericRowExtraHeight(view)
-        applyAlphaRowExtraHeight(view)
-        applyKeyboardTextSize(view)
+        val wrapper = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val closeBar = LinearLayout(activity).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.END
+            setPadding(dp(4), dp(2), dp(4), dp(4))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val btnCloseKeyboard = TextView(activity).apply {
+            text = "TUTUP KEYBOARD  ✕"
+            setTextColor(ContextCompat.getColor(activity, R.color.cyan_accent))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            includeFontPadding = false
+            setPadding(dp(12), dp(7), dp(12), dp(7))
+            setBackgroundResource(R.drawable.bg_keyboard_button)
+            isClickable = true
+            isFocusable = true
+
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+
+            setOnClickListener {
+                hideKeyboard()
+            }
+        }
+
+        closeBar.addView(btnCloseKeyboard)
+        wrapper.addView(closeBar)
+
+        val keyboardView = LayoutInflater.from(activity).inflate(layoutRes, wrapper, false)
+        wrapper.addView(keyboardView)
+
+        keyboardContainer.addView(wrapper)
+
+        applyKeyboardHeightScale(keyboardView)
+        applyNumericRowExtraHeight(keyboardView)
+        applyAlphaRowExtraHeight(keyboardView)
+        applyKeyboardTextSize(keyboardView)
 
         val buttonIds = listOf(
             R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4,
@@ -116,34 +274,34 @@ class CustomKeyboardManager(
         )
 
         buttonIds.forEach { id ->
-            view.findViewById<View>(id)?.setOnClickListener {
+            keyboardView.findViewById<View>(id)?.setOnClickListener {
                 if (it is Button) {
                     appendText(it.text.toString())
                 }
             }
         }
 
-        view.findViewById<View>(R.id.btnClear)?.setOnClickListener {
+        keyboardView.findViewById<View>(R.id.btnClear)?.setOnClickListener {
             clearText()
         }
 
-        view.findViewById<View>(R.id.btnTutup)?.setOnClickListener {
+        keyboardView.findViewById<View>(R.id.btnTutup)?.setOnClickListener {
             clearText()
         }
 
-        view.findViewById<View>(R.id.btnBackspace)?.setOnClickListener {
+        keyboardView.findViewById<View>(R.id.btnBackspace)?.setOnClickListener {
             deleteChar()
         }
 
-        view.findViewById<View>(R.id.btnBackspaceAlt)?.setOnClickListener {
+        keyboardView.findViewById<View>(R.id.btnBackspaceAlt)?.setOnClickListener {
             deleteChar()
         }
 
-        view.findViewById<View>(R.id.btnSpace)?.setOnClickListener {
+        keyboardView.findViewById<View>(R.id.btnSpace)?.setOnClickListener {
             appendText(" ")
         }
 
-        view.findViewById<View>(R.id.btnSwitchLayout)?.setOnClickListener {
+        keyboardView.findViewById<View>(R.id.btnSwitchLayout)?.setOnClickListener {
             val currentLayout = sharedPref.getString("keyboard_layout", "default") ?: "default"
 
             val nextLayout = if (currentLayout == "default") {
@@ -159,18 +317,22 @@ class CustomKeyboardManager(
             setupKeyboardLayout()
             keyboardContainer.visibility = View.VISIBLE
             activeEditText?.requestFocus()
+            activeEditText?.let {
+                forceHideAndroidKeyboard(it)
+            }
         }
 
-        view.findViewById<View>(R.id.btnKeyboardSetting)?.setOnClickListener {
+        keyboardView.findViewById<View>(R.id.btnKeyboardSetting)?.setOnClickListener {
+            forceHideAndroidKeyboard()
             val intent = Intent(activity, KeyboardSettingsActivity::class.java)
             activity.startActivity(intent)
         }
 
-        view.findViewById<View>(R.id.btnCursorLeft)?.setOnClickListener {
+        keyboardView.findViewById<View>(R.id.btnCursorLeft)?.setOnClickListener {
             moveCursorLeft()
         }
 
-        view.findViewById<View>(R.id.btnCursorRight)?.setOnClickListener {
+        keyboardView.findViewById<View>(R.id.btnCursorRight)?.setOnClickListener {
             moveCursorRight()
         }
     }
@@ -354,5 +516,9 @@ class CustomKeyboardManager(
         if (current < max) {
             editText.setSelection(current + 1)
         }
+    }
+
+    private fun dp(value: Int): Int {
+        return (value * activity.resources.displayMetrics.density).toInt()
     }
 }
