@@ -36,7 +36,7 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnGoogleSignIn"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="70dp"
         android:layout_marginTop="48dp"
         android:text="Masuk/Daftar dengan Google"
         android:textAllCaps="false"
@@ -68,7 +68,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Akun digunakan untuk sinkronisasi data\ndan status langganan"
+        android:text="Akun digunakan untuk sinkronisasi data secara real time"
         android:textColor="@color/gray_text"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
