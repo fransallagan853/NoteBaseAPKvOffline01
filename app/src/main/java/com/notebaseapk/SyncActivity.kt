@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.zip.GZIPInputStream
+import com.notebaseapk.util.NopolFormatter
 
 class SyncActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySyncBinding
@@ -326,11 +327,17 @@ class SyncActivity : AppCompatActivity() {
                     updateSyncProgress(65, "Mengimpor data...")
                 }
 
+                // Ambil data lama untuk dicocokkan berdasarkan nopolKey
                 val existingList = dbRoom.kendaraanDao().getAllKendaraanList()
-                val existingMap = existingList.associateBy { "${it.nopol}|${it.leasing}" }
+                val existingMap = existingList.associateBy { existing ->
+                    existing.nopolKey.ifBlank {
+                        NopolFormatter.generateNopolKey(existing.nopol)
+                    }
+                }
 
                 sqliteDb = SQLiteDatabase.openDatabase(sqliteFile.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
                 cursor = sqliteDb.rawQuery("SELECT * FROM kendaraan_update", null)
+
                 val totalImportRows = cursor?.count ?: 0
                 val toInsert = mutableListOf<Kendaraan>()
                 val toUpdate = mutableListOf<Kendaraan>()
@@ -351,15 +358,29 @@ class SyncActivity : AppCompatActivity() {
                     val colCatatan = cursor.getColumnIndexOrThrow("catatan")
                     val colSearchKey = cursor.getColumnIndexOrThrow("searchKey")
 
+                    // Kolom baru dari dashboard/server nanti
+                    // Dibuat optional supaya APK tetap aman walau server belum kirim kolom ini.
+                    val colNopolKey = cursor.getColumnIndex("nopolKey")
+                    val colPeriodeData = cursor.getColumnIndex("periodeData")
+
                     do {
                         val nopol = cursor.getString(colNopol) ?: ""
                         if (nopol.isBlank()) continue
 
+                        val rawNopolKey = if (colNopolKey >= 0) {
+                            cursor.getString(colNopolKey) ?: ""
+                        } else {
+                            ""
+                        }
+
+                        val nopolKey = rawNopolKey.ifBlank {
+                            NopolFormatter.generateNopolKey(nopol)
+                        }
+
+                        val existing = existingMap[nopolKey]
+
                         val leasing = cursor.getString(colLeasing) ?: ""
                         val cabang = cursor.getString(colCabang) ?: ""
-
-                        val existing = existingMap["$nopol|$leasing"]
-
                         val nama = cursor.getString(colNama) ?: ""
                         val groupNumber = cursor.getString(colGroup) ?: extractGroup(nopol)
                         val tahun = cursor.getString(colTahun) ?: ""
@@ -368,18 +389,36 @@ class SyncActivity : AppCompatActivity() {
                         val mesin = cursor.getString(colMesin) ?: ""
                         val saldo = cursor.getString(colSaldo) ?: ""
                         val overdue = cursor.getString(colOverdue) ?: ""
-                        val catatan = cursor.getString(colCatatan) ?: ""
+                        val catatanFromFile = cursor.getString(colCatatan) ?: ""
+
+                        val periodeDataFromFile = if (colPeriodeData >= 0) {
+                            cursor.getString(colPeriodeData) ?: ""
+                        } else {
+                            ""
+                        }
+
                         var searchKey = cursor.getString(colSearchKey) ?: ""
 
                         if (searchKey.isBlank()) {
                             searchKey = generateSearchKey(
-                                nopol, nama, tahun, warna, rangka, mesin, leasing, cabang, saldo, overdue, catatan
+                                nopol,
+                                nama,
+                                tahun,
+                                warna,
+                                rangka,
+                                mesin,
+                                leasing,
+                                cabang,
+                                saldo,
+                                overdue,
+                                catatanFromFile
                             )
                         }
 
                         val k = Kendaraan(
                             id = existing?.id ?: 0,
                             nopol = nopol,
+                            nopolKey = nopolKey,
                             groupNumber = groupNumber,
                             namaKendaraan = nama,
                             tahun = tahun,
@@ -390,24 +429,37 @@ class SyncActivity : AppCompatActivity() {
                             cabang = cabang,
                             saldo = saldo,
                             overdue = overdue,
-                            catatan = catatan,
+                            periodeData = periodeDataFromFile.ifBlank {
+                                existing?.periodeData ?: ""
+                            },
+                            catatan = existing?.catatan?.takeIf { it.isNotBlank() } ?: catatanFromFile,
                             searchKey = searchKey,
                             editorName = existing?.editorName,
                             editorPhone = existing?.editorPhone
                         )
 
-                        if (existing == null) toInsert.add(k) else toUpdate.add(k)
+                        if (existing == null) {
+                            toInsert.add(k)
+                        } else {
+                            toUpdate.add(k)
+                        }
+
                         importCount++
 
                         if (importCount % 500 == 0 && totalImportRows > 0) {
                             val importProgress = 65 + ((importCount * 30) / totalImportRows)
-                            updateSyncProgress(importProgress.coerceIn(65, 95), "Mengimpor data... $importCount/$totalImportRows")
+                            updateSyncProgress(
+                                importProgress.coerceIn(65, 95),
+                                "Mengimpor data... $importCount/$totalImportRows"
+                            )
                         }
+
                         if (toInsert.size + toUpdate.size >= batchSize) {
                             dbRoom.kendaraanDao().importData(toInsert, toUpdate)
                             toInsert.clear()
                             toUpdate.clear()
                         }
+
                     } while (cursor.moveToNext())
                 }
 
@@ -418,9 +470,13 @@ class SyncActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     finishSyncProgress(100, "Sinkron selesai")
                     Toast.makeText(this@SyncActivity, "Import selesai: $importCount data masuk", Toast.LENGTH_LONG).show()
-                    getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE).edit().putLong("last_server_version_code", versionCode).apply()
+
+                    val prefs = getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
+                    prefs.edit().putLong("last_server_version_code", versionCode).apply()
+
                     saveSyncTime()
                 }
+
             } catch (e: Exception) {
                 Log.e("SyncActivity", "Error importSqliteUpdateToRoom", e)
                 withContext(Dispatchers.Main) {

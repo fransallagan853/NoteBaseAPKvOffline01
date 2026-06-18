@@ -21,6 +21,11 @@ import kotlinx.coroutines.launch
 import com.notebaseapk.util.NopolFormatter
 
 class DetailActivity : AppCompatActivity() {
+    private fun getNopolKey(k: Kendaraan): String {
+        return k.nopolKey.ifBlank {
+            NopolFormatter.generateNopolKey(k.nopol)
+        }
+    }
     private lateinit var binding: ActivityDetailBinding
     private lateinit var db: AppDatabase
     private var vehicleId: Int = -1
@@ -76,6 +81,7 @@ class DetailActivity : AppCompatActivity() {
                 binding.tvNoRangka.text = it.noRangka.ifEmpty { "-" }
                 binding.tvNoMesin.text = it.noMesin.ifEmpty { "-" }
                 binding.tvLeasing.text = it.leasing
+                binding.tvPeriodeData.text = it.periodeData.ifEmpty { "-" }
                 binding.tvCabang.text = it.cabang.ifEmpty { "-" }
                 binding.tvSaldo.text = it.saldo.ifEmpty { "-" }
                 binding.tvOverdue.text = it.overdue.ifEmpty { "-" }
@@ -123,6 +129,7 @@ class DetailActivity : AppCompatActivity() {
     private fun checkFavoriteStatus(k: Kendaraan) {
         lifecycleScope.launch {
             val count = db.favoriteVehicleDao().isFavorite(
+                nopolKey = getNopolKey(k),
                 nopol = k.nopol,
                 leasing = k.leasing,
                 cabang = k.cabang
@@ -135,8 +142,11 @@ class DetailActivity : AppCompatActivity() {
 
     private fun toggleFavorite(k: Kendaraan) {
         lifecycleScope.launch {
+            val nopolKey = getNopolKey(k)
+
             if (isFavorite) {
                 db.favoriteVehicleDao().deleteFavoriteByKey(
+                    nopolKey = nopolKey,
                     nopol = k.nopol,
                     leasing = k.leasing,
                     cabang = k.cabang
@@ -146,6 +156,7 @@ class DetailActivity : AppCompatActivity() {
                 Toast.makeText(this@DetailActivity, "Dihapus dari favorit", Toast.LENGTH_SHORT).show()
             } else {
                 val favorite = FavoriteVehicle(
+                    nopolKey = nopolKey,
                     nopol = k.nopol,
                     leasing = k.leasing,
                     cabang = k.cabang
@@ -173,20 +184,21 @@ class DetailActivity : AppCompatActivity() {
         val formattedNopol = NopolFormatter.display(it.nopol)
 
         var text = """
-            noteBase - Detail Data
+    noteBase - Detail Data
 
-            Nomor Polisi: $formattedNopol
-            Kendaraan: ${it.namaKendaraan}
-            Tahun: ${it.tahun.ifEmpty { "-" }}
-            Warna: ${it.warna.ifEmpty { "-" }}
-            Leasing: ${it.leasing}
-            Cabang: ${it.cabang.ifEmpty { "-" }}
-            No Rangka: ${it.noRangka.ifEmpty { "-" }}
-            No Mesin: ${it.noMesin.ifEmpty { "-" }}
-            Saldo: ${it.saldo.ifEmpty { "-" }}
-            Overdue/OVD: ${it.overdue.ifEmpty { "-" }}
-            Catatan: ${it.catatan.ifEmpty { "-" }}
-        """.trimIndent()
+    Nomor Polisi: $formattedNopol
+    Periode Data: ${it.periodeData.ifEmpty { "-" }}
+    Kendaraan: ${it.namaKendaraan}
+    Tahun: ${it.tahun.ifEmpty { "-" }}
+    Warna: ${it.warna.ifEmpty { "-" }}
+    Leasing: ${it.leasing}
+    Cabang: ${it.cabang.ifEmpty { "-" }}
+    No Rangka: ${it.noRangka.ifEmpty { "-" }}
+    No Mesin: ${it.noMesin.ifEmpty { "-" }}
+    Saldo: ${it.saldo.ifEmpty { "-" }}
+    Overdue/OVD: ${it.overdue.ifEmpty { "-" }}
+    Catatan: ${it.catatan.ifEmpty { "-" }}
+""".trimIndent()
 
         if (!it.editorName.isNullOrEmpty()) {
             text += "\n\nDiedit oleh:\nNama: ${it.editorName}\nNo Telp: ${it.editorPhone ?: "-"}"
@@ -221,6 +233,7 @@ class DetailActivity : AppCompatActivity() {
                         db.kendaraanDao().delete(it)
 
                         db.favoriteVehicleDao().deleteFavoriteByKey(
+                            nopolKey = getNopolKey(it),
                             nopol = it.nopol,
                             leasing = it.leasing,
                             cabang = it.cabang

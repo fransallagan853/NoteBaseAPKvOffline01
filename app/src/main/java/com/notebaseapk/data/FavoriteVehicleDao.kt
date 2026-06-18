@@ -5,35 +5,49 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import com.notebaseapk.data.Kendaraan
 
 @Dao
 interface FavoriteVehicleDao {
+
     @Query("""
-    SELECT k.* FROM kendaraan k
-    INNER JOIN favorite_vehicles f
-    ON k.nopol = f.nopol
-    AND k.leasing = f.leasing
-    AND k.cabang = f.cabang
-    ORDER BY f.createdAt DESC
-""")
+        SELECT DISTINCT k.* FROM kendaraan k
+        INNER JOIN favorite_vehicles f
+        ON (
+            (f.nopolKey != '' AND k.nopolKey = f.nopolKey)
+            OR
+            (f.nopolKey = '' 
+                AND k.nopol = f.nopol
+                AND k.leasing = f.leasing
+                AND k.cabang = f.cabang
+            )
+        )
+        ORDER BY f.createdAt DESC
+    """)
     fun getFavoriteKendaraanList(): Flow<List<Kendaraan>>
+
     @Query("""
-    SELECT * FROM kendaraan
-    WHERE TRIM(catatan) != ''
-    ORDER BY nopol ASC
-""")
+        SELECT * FROM kendaraan
+        WHERE TRIM(catatan) != ''
+        ORDER BY CAST(groupNumber AS INTEGER) ASC, nopol ASC
+    """)
     fun getCatatanKendaraanList(): Flow<List<Kendaraan>>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertFavorite(favorite: FavoriteVehicle)
 
     @Query("""
         DELETE FROM favorite_vehicles
-        WHERE nopol = :nopol
-        AND leasing = :leasing
-        AND cabang = :cabang
+        WHERE 
+            (nopolKey = :nopolKey AND :nopolKey != '')
+            OR
+            (
+                nopol = :nopol
+                AND leasing = :leasing
+                AND cabang = :cabang
+            )
     """)
     suspend fun deleteFavoriteByKey(
+        nopolKey: String,
         nopol: String,
         leasing: String,
         cabang: String
@@ -41,11 +55,17 @@ interface FavoriteVehicleDao {
 
     @Query("""
         SELECT COUNT(*) FROM favorite_vehicles
-        WHERE nopol = :nopol
-        AND leasing = :leasing
-        AND cabang = :cabang
+        WHERE 
+            (nopolKey = :nopolKey AND :nopolKey != '')
+            OR
+            (
+                nopol = :nopol
+                AND leasing = :leasing
+                AND cabang = :cabang
+            )
     """)
     suspend fun isFavorite(
+        nopolKey: String,
         nopol: String,
         leasing: String,
         cabang: String

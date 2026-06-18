@@ -12,44 +12,35 @@ interface KendaraanDao {
     suspend fun getAllKendaraanList(): List<Kendaraan>
 
     @Query("""
-    SELECT 
-        printf('%04d', CAST(groupNumber AS INTEGER)) AS groupNumber,
-        COUNT(*) as jumlah
-    FROM kendaraan
-    WHERE 
-        :keyword = ''
-        OR printf('%04d', CAST(groupNumber AS INTEGER)) LIKE :keyword || '%'
-        OR groupNumber LIKE :keyword || '%'
-    GROUP BY CAST(groupNumber AS INTEGER)
-    ORDER BY CAST(groupNumber AS INTEGER) ASC
-""")
+        SELECT 
+            printf('%04d', CAST(groupNumber AS INTEGER)) AS groupNumber,
+            COUNT(*) as jumlah
+        FROM kendaraan
+        WHERE 
+            :keyword = ''
+            OR printf('%04d', CAST(groupNumber AS INTEGER)) LIKE :keyword || '%'
+            OR groupNumber LIKE :keyword || '%'
+        GROUP BY CAST(groupNumber AS INTEGER)
+        ORDER BY CAST(groupNumber AS INTEGER) ASC
+    """)
     fun getGroupNopol(keyword: String): Flow<List<GroupNopol>>
 
     @Query("""
-    SELECT * FROM kendaraan 
-    WHERE CAST(groupNumber AS INTEGER) = CAST(:groupNumber AS INTEGER)
-    AND searchKey LIKE '%' || :filter || '%'
-    ORDER BY nopol ASC
-""")
+        SELECT * FROM kendaraan 
+        WHERE CAST(groupNumber AS INTEGER) = CAST(:groupNumber AS INTEGER)
+        AND searchKey LIKE '%' || :filter || '%'
+        ORDER BY nopol ASC
+    """)
     fun getKendaraanByGroup(groupNumber: String, filter: String): Flow<List<Kendaraan>>
 
-    @Query("""
-    SELECT * FROM kendaraan
-    WHERE UPPER(
-        REPLACE(
-            REPLACE(
-                REPLACE(nopol, ' ', ''),
-            '-', ''),
-        '.', '')
-    ) LIKE '%' || :normalizedNopol || '%'
-    ORDER BY nopol ASC
-""")
-    fun searchKendaraanByNopolOnly(normalizedNopol: String): Flow<List<Kendaraan>>
     @Query("SELECT * FROM kendaraan WHERE searchKey LIKE '%' || :normalizedKeyword || '%' ORDER BY nopol ASC")
     fun searchKendaraanSpesifik(normalizedKeyword: String): Flow<List<Kendaraan>>
 
     @Query("SELECT * FROM kendaraan WHERE id = :id")
     suspend fun getKendaraanById(id: Int): Kendaraan?
+
+    @Query("SELECT * FROM kendaraan WHERE nopolKey = :nopolKey LIMIT 1")
+    suspend fun getKendaraanByNopolKey(nopolKey: String): Kendaraan?
 
     @Query("SELECT * FROM kendaraan WHERE nopol = :nopol AND leasing = :leasing LIMIT 1")
     suspend fun getKendaraanByNopolAndLeasing(nopol: String, leasing: String): Kendaraan?

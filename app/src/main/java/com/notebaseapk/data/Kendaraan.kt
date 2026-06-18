@@ -11,6 +11,7 @@ import androidx.room.PrimaryKey
 data class Kendaraan(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val nopol: String,
+    val nopolKey: String = "",
     val groupNumber: String,
     val namaKendaraan: String,
     val tahun: String = "",
@@ -21,6 +22,7 @@ data class Kendaraan(
     val cabang: String = "",
     val saldo: String = "",
     val overdue: String = "",
+    val periodeData: String = "",
     var catatan: String,
     val searchKey: String = "",
     var editorName: String? = null,

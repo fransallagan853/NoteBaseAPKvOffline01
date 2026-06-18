@@ -29,6 +29,24 @@ object NopolFormatter {
         }
     }
 
+    fun formatGroupNumber(raw: String): String {
+        val digits = raw.trim().filter { it.isDigit() }
+
+        if (digits.isBlank()) return raw.trim()
+
+        return digits.padStart(4, '0')
+    }
+
+    fun generateNopolKey(raw: String): String {
+        val part = parse(raw)
+
+        return if (part != null) {
+            "${part.wilayah}${part.angkaText}${part.seri}"
+        } else {
+            normalize(raw)
+        }
+    }
+
     fun sortList(list: List<Kendaraan>): List<Kendaraan> {
         return list
             .map { kendaraan ->
@@ -51,6 +69,7 @@ object NopolFormatter {
             )
             .map { it.first }
     }
+
     private fun parse(raw: String): NopolPart? {
         val clean = normalize(raw)
 
@@ -68,14 +87,6 @@ object NopolFormatter {
             seri = match.groupValues[3],
             fallback = clean
         )
-    }
-
-    fun formatGroupNumber(raw: String): String {
-        val digits = raw.trim().filter { it.isDigit() }
-
-        if (digits.isBlank()) return raw.trim()
-
-        return digits.padStart(4, '0')
     }
 
     private fun normalize(raw: String): String {
