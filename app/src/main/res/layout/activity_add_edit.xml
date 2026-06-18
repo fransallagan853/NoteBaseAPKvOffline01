@@ -313,39 +313,39 @@
                 android:textColor="@color/white_text"
                 android:textColorHint="@color/gray_text" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Visibilitas Data"
-                android:textColor="@color/gray_text"
-                android:textSize="12sp" />
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="20dp"-->
+<!--                android:text="Visibilitas Data"-->
+<!--                android:textColor="@color/gray_text"-->
+<!--                android:textSize="12sp" />-->
 
-            <RadioGroup
-                android:id="@+id/rgVisibility"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
+<!--            <RadioGroup-->
+<!--                android:id="@+id/rgVisibility"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="8dp"-->
+<!--                android:orientation="horizontal">-->
 
-                <RadioButton
-                    android:id="@+id/rbPrivate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Privat"
-                    android:textColor="@color/white_text"
-                    android:buttonTint="@color/cyan_accent"
-                    android:checked="true" />
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rbPrivate"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Privat"-->
+<!--                    android:textColor="@color/white_text"-->
+<!--                    android:buttonTint="@color/cyan_accent"-->
+<!--                    android:checked="true" />-->
 
-                <RadioButton
-                    android:id="@+id/rbPublish"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:text="Publish"
-                    android:textColor="@color/white_text"
-                    android:buttonTint="@color/cyan_accent" />
-            </RadioGroup>
+<!--                <RadioButton-->
+<!--                    android:id="@+id/rbPublish"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="24dp"-->
+<!--                    android:text="Publish"-->
+<!--                    android:textColor="@color/white_text"-->
+<!--                    android:buttonTint="@color/cyan_accent" />-->
+<!--            </RadioGroup>-->
 
         </LinearLayout>
     </ScrollView>

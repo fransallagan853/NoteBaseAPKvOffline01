@@ -128,7 +128,7 @@ class AddEditActivity : AppCompatActivity() {
         val saldo = binding.etSaldo.text.toString().trim()
         val ovd = binding.etOverdue.text.toString().trim()
         val catatan = binding.etCatatan.text.toString().trim()
-        val isPublish = binding.rbPublish.isChecked
+        //val isPublish = binding.rbPublish.isChecked
 
         if (nopol.isEmpty() || nama.isEmpty()) {
             Toast.makeText(this, "Nopol dan Nama wajib diisi", Toast.LENGTH_SHORT).show()
@@ -140,33 +140,33 @@ class AddEditActivity : AppCompatActivity() {
             var publisherPhone: String? = null
             var publisherEmail: String? = null
 
-            if (isPublish) {
-                val user = auth.currentUser
-                if (user == null) {
-                    Toast.makeText(this@AddEditActivity, "Silakan login terlebih dahulu untuk publish data", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-
-                try {
-                    val userDoc = firestore.collection("users").document(user.uid).get().await()
-                    if (userDoc.exists()) {
-                        publisherName = userDoc.getString("name")
-                        publisherPhone = userDoc.getString("phone")
-                        publisherEmail = userDoc.getString("email")
-
-                        if (publisherName.isNullOrEmpty() || publisherPhone.isNullOrEmpty()) {
-                            Toast.makeText(this@AddEditActivity, "Lengkapi profil terlebih dahulu sebelum publish data", Toast.LENGTH_SHORT).show()
-                            return@launch
-                        }
-                    } else {
-                        Toast.makeText(this@AddEditActivity, "Data profil tidak ditemukan", Toast.LENGTH_SHORT).show()
-                        return@launch
-                    }
-                } catch (e: Exception) {
-                    Toast.makeText(this@AddEditActivity, "Gagal mengambil profil: ${e.message}", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-            }
+//            if (isPublish) {
+//                val user = auth.currentUser
+//                if (user == null) {
+//                    Toast.makeText(this@AddEditActivity, "Silakan login terlebih dahulu untuk publish data", Toast.LENGTH_SHORT).show()
+//                    return@launch
+//                }
+//
+//                try {
+//                    val userDoc = firestore.collection("users").document(user.uid).get().await()
+//                    if (userDoc.exists()) {
+//                        publisherName = userDoc.getString("name")
+//                        publisherPhone = userDoc.getString("phone")
+//                        publisherEmail = userDoc.getString("email")
+//
+//                        if (publisherName.isNullOrEmpty() || publisherPhone.isNullOrEmpty()) {
+//                            Toast.makeText(this@AddEditActivity, "Lengkapi profil terlebih dahulu sebelum publish data", Toast.LENGTH_SHORT).show()
+//                            return@launch
+//                        }
+//                    } else {
+//                        Toast.makeText(this@AddEditActivity, "Data profil tidak ditemukan", Toast.LENGTH_SHORT).show()
+//                        return@launch
+//                    }
+//                } catch (e: Exception) {
+//                    Toast.makeText(this@AddEditActivity, "Gagal mengambil profil: ${e.message}", Toast.LENGTH_SHORT).show()
+//                    return@launch
+//                }
+//            }
 
             val groupNumber = extractGroup(nopol)
             val searchKey = generateSearchKey(
@@ -194,36 +194,36 @@ class AddEditActivity : AppCompatActivity() {
             if (vehicleId == -1) db.kendaraanDao().insert(kendaraan)
             else db.kendaraanDao().update(kendaraan)
 
-            if (isPublish) {
-                val publicData = hashMapOf(
-                    "nopol" to nopol,
-                    "namaKendaraan" to nama,
-                    "tahun" to tahun,
-                    "warna" to warna,
-                    "noRangka" to rangka,
-                    "noMesin" to mesin,
-                    "leasing" to leasing,
-                    "cabang" to cabang,
-                    "saldo" to saldo,
-                    "overdue" to ovd,
-                    "catatan" to catatan,
-                    "publisherUid" to auth.currentUser?.uid,
-                    "publisherName" to publisherName,
-                    "publisherPhone" to publisherPhone,
-                    "publisherEmail" to publisherEmail,
-                    "status" to "approved",
-                    "createdAt" to FieldValue.serverTimestamp()
-                )
-
-                try {
-                    firestore.collection("public_vehicles").add(publicData).await()
-                    Toast.makeText(this@AddEditActivity, "Data berhasil dipublish", Toast.LENGTH_SHORT).show()
-                } catch (e: Exception) {
-                    Toast.makeText(this@AddEditActivity, "Gagal publish ke Firestore: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                Toast.makeText(this@AddEditActivity, "Data disimpan secara privat", Toast.LENGTH_SHORT).show()
-            }
+//            if (isPublish) {
+//                val publicData = hashMapOf(
+//                    "nopol" to nopol,
+//                    "namaKendaraan" to nama,
+//                    "tahun" to tahun,
+//                    "warna" to warna,
+//                    "noRangka" to rangka,
+//                    "noMesin" to mesin,
+//                    "leasing" to leasing,
+//                    "cabang" to cabang,
+//                    "saldo" to saldo,
+//                    "overdue" to ovd,
+//                    "catatan" to catatan,
+//                    "publisherUid" to auth.currentUser?.uid,
+//                    "publisherName" to publisherName,
+//                    "publisherPhone" to publisherPhone,
+//                    "publisherEmail" to publisherEmail,
+//                    "status" to "approved",
+//                    "createdAt" to FieldValue.serverTimestamp()
+//                )
+//
+//                try {
+//                    firestore.collection("public_vehicles").add(publicData).await()
+//                    Toast.makeText(this@AddEditActivity, "Data berhasil dipublish", Toast.LENGTH_SHORT).show()
+//                } catch (e: Exception) {
+//                    Toast.makeText(this@AddEditActivity, "Gagal publish ke Firestore: ${e.message}", Toast.LENGTH_SHORT).show()
+//                }
+//            } else {
+//                Toast.makeText(this@AddEditActivity, "Data disimpan secara privat", Toast.LENGTH_SHORT).show()
+//            }
             finish()
         }
     }
