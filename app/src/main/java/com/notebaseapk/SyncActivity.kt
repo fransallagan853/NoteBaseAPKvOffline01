@@ -465,7 +465,9 @@ class SyncActivity : AppCompatActivity() {
 
                 if (toInsert.isNotEmpty() || toUpdate.isNotEmpty()) {
                     dbRoom.kendaraanDao().importData(toInsert, toUpdate)
+
                 }
+                dbRoom.kendaraanDao().deleteOldDuplicatesByNopolKey()
 
                 withContext(Dispatchers.Main) {
                     finishSyncProgress(100, "Sinkron selesai")

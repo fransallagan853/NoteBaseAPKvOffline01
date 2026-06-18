@@ -10,19 +10,25 @@ import kotlinx.coroutines.flow.Flow
 interface FavoriteVehicleDao {
 
     @Query("""
-        SELECT DISTINCT k.* FROM kendaraan k
-        INNER JOIN favorite_vehicles f
-        ON (
-            (f.nopolKey != '' AND k.nopolKey = f.nopolKey)
-            OR
-            (f.nopolKey = '' 
-                AND k.nopol = f.nopol
-                AND k.leasing = f.leasing
-                AND k.cabang = f.cabang
-            )
-        )
-        ORDER BY f.createdAt DESC
-    """)
+    SELECT k.* FROM kendaraan k
+    INNER JOIN favorite_vehicles f
+    ON k.nopolKey = f.nopolKey
+    WHERE k.id = (
+        SELECT k2.id
+        FROM kendaraan k2
+        WHERE k2.nopolKey = k.nopolKey
+        ORDER BY 
+            CASE 
+                WHEN LENGTH(k2.periodeData) = 5 
+                THEN CAST(SUBSTR(k2.periodeData, 4, 2) AS INTEGER) * 100 
+                     + CAST(SUBSTR(k2.periodeData, 1, 2) AS INTEGER)
+                ELSE 0
+            END DESC,
+            k2.id DESC
+        LIMIT 1
+    )
+    ORDER BY f.createdAt DESC
+""")
     fun getFavoriteKendaraanList(): Flow<List<Kendaraan>>
 
     @Query("""

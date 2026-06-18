@@ -72,6 +72,32 @@ interface KendaraanDao {
     @Query("SELECT COUNT(*) FROM kendaraan")
     suspend fun getCountSync(): Int
 
+    @Query("""
+    DELETE FROM kendaraan
+    WHERE nopolKey != ''
+    AND id NOT IN (
+        SELECT id FROM (
+            SELECT k.id
+            FROM kendaraan k
+            WHERE k.nopolKey != ''
+            AND k.id = (
+                SELECT k2.id
+                FROM kendaraan k2
+                WHERE k2.nopolKey = k.nopolKey
+                ORDER BY 
+                    CASE 
+                        WHEN LENGTH(k2.periodeData) = 5 
+                        THEN CAST(SUBSTR(k2.periodeData, 4, 2) AS INTEGER) * 100 
+                             + CAST(SUBSTR(k2.periodeData, 1, 2) AS INTEGER)
+                        ELSE 0
+                    END DESC,
+                    k2.id DESC
+                LIMIT 1
+            )
+        )
+    )
+""")
+    suspend fun deleteOldDuplicatesByNopolKey()
     @Transaction
     suspend fun importData(newData: List<Kendaraan>, updateData: List<Kendaraan>) {
         if (newData.isNotEmpty()) insertAll(newData)
