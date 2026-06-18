@@ -19,6 +19,8 @@ import com.notebaseapk.data.Kendaraan
 import com.notebaseapk.databinding.ActivityDetailBinding
 import kotlinx.coroutines.launch
 import com.notebaseapk.util.NopolFormatter
+import android.content.res.ColorStateList
+import androidx.core.content.ContextCompat
 
 class DetailActivity : AppCompatActivity() {
     private fun getNopolKey(k: Kendaraan): String {
@@ -36,6 +38,9 @@ class DetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.headerLayout.applyStatusBarPadding()
+        binding.actionLayout.applyNavigationBarMargin()
 
         db = AppDatabase.getDatabase(this)
         vehicleId = intent.getIntExtra("VEHICLE_ID", -1)
@@ -173,10 +178,16 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun updateFavoriteButton() {
+        binding.btnFavorite.setTextColor(
+            android.graphics.Color.parseColor("#FFC107")
+        )
+
         if (isFavorite) {
-            binding.btnFavorite.text = "★ Difavoritkan"
+            binding.btnFavorite.text = "★"
+            binding.btnFavorite.contentDescription = "Hapus dari favorit"
         } else {
-            binding.btnFavorite.text = "☆ Favorit"
+            binding.btnFavorite.text = "☆"
+            binding.btnFavorite.contentDescription = "Tambah ke favorit"
         }
     }
 
