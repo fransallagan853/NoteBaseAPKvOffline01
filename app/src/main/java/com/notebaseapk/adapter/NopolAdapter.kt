@@ -53,10 +53,6 @@ class NopolAdapter(
                 details.add(item.namaKendaraan)
             }
 
-            if (item.tahun.isNotEmpty()) {
-                details.add(item.tahun)
-            }
-
             if (item.warna.isNotEmpty()) {
                 details.add(item.warna)
             }
