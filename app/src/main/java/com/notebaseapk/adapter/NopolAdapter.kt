@@ -14,22 +14,28 @@ class NopolAdapter(
 ) : RecyclerView.Adapter<NopolAdapter.NopolViewHolder>() {
 
     fun updateData(newList: List<Kendaraan>) {
-        list = newList
+        list = NopolFormatter.sortList(newList)
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NopolViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): NopolViewHolder {
         val binding = ItemNopolCompactBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
+
         return NopolViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: NopolViewHolder, position: Int) {
-        val item = list[position]
-        holder.bind(item)
+    override fun onBindViewHolder(
+        holder: NopolViewHolder,
+        position: Int
+    ) {
+        holder.bind(list[position])
     }
 
     override fun getItemCount(): Int = list.size
