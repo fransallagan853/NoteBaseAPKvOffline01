@@ -91,15 +91,17 @@ class NoteEditActivity : AppCompatActivity() {
 
     private fun saveNote() {
         val noteText = binding.etCatatan.text.toString().trim()
-        val isPublish = binding.rbPublish.isChecked
 
-        if (isPublish) {
-            publishNote(noteText)
-        } else {
+//        FITUR VISIBILITAS PRIVAT / PUBLISH DIMATIKAN SEMENTARA
+//        val isPublish = binding.rbPublish.isChecked
+
+//        if (isPublish) {
+//            publishNote(noteText)
+//        } else {
             saveLocally(noteText, null, null)
             Toast.makeText(this, "Catatan pribadi berhasil disimpan", Toast.LENGTH_SHORT).show()
             finish()
-        }
+//        }
     }
 
     private fun publishNote(noteText: String) {
