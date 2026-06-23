@@ -152,8 +152,8 @@
             android:clickable="true"
             android:focusable="true">
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:src="@drawable/ic_home"
                 app:tint="@color/cyan_accent" />
             <TextView
@@ -163,7 +163,7 @@
                 android:layout_marginTop="2dp"
                 android:text="Beranda"
                 android:textColor="@color/cyan_accent"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -205,8 +205,8 @@
             android:clickable="true"
             android:focusable="true">
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:src="@drawable/ic_sync"
                 app:tint="@color/gray_text" />
             <TextView
@@ -215,7 +215,7 @@
                 android:layout_marginTop="2dp"
                 android:text="Sinkron"
                 android:textColor="@color/gray_text"
-                android:textSize="11sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -229,8 +229,8 @@
             android:clickable="true"
             android:focusable="true">
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:src="@drawable/ic_settings"
                 app:tint="@color/gray_text" />
             <TextView
@@ -239,7 +239,7 @@
                 android:layout_marginTop="2dp"
                 android:text="Pengaturan"
                 android:textColor="@color/gray_text"
-                android:textSize="11sp" />
+                android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>
 
