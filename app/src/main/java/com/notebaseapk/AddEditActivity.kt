@@ -42,7 +42,32 @@ class AddEditActivity : AppCompatActivity() {
         setupSafeHeader()
 
         db = AppDatabase.getDatabase(this)
-        vehicleId = intent.getIntExtra("VEHICLE_ID", -1)
+
+        vehicleId = intent.getIntExtra(
+            "VEHICLE_ID",
+            -1
+        )
+
+        /*
+         * Hanya mengisi otomatis saat membuka mode Tambah Data.
+         * Saat Edit Data, nopol tetap diambil dari database seperti biasa.
+         */
+        if (vehicleId == -1) {
+            val prefillNopol = intent.getStringExtra(
+                "PREFILL_NOPOL"
+            )
+                .orEmpty()
+                .trim()
+                .uppercase(Locale.getDefault())
+
+            if (prefillNopol.isNotEmpty()) {
+                binding.etNopol.setText(prefillNopol)
+
+                binding.etNopol.setSelection(
+                    binding.etNopol.text.length
+                )
+            }
+        }
 
         setupCustomKeyboard()
         setupSafeSaveButton()

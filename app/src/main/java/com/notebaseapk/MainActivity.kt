@@ -92,80 +92,154 @@ class MainActivity : AppCompatActivity() {
 
     private fun performSearch(query: String) {
         searchJob?.cancel()
+
         searchJob = lifecycleScope.launch {
             val cleanQuery = query.trim()
+
+            hideAddFromSearchButton()
 
             if (cleanQuery.isBlank()) {
                 binding.tvSearchLabel.visibility = View.GONE
                 binding.rvGroup.adapter = groupAdapter
 
-                db.kendaraanDao().getGroupNopol("").collectLatest {
-                    groupAdapter.updateData(it)
-                }
+                db.kendaraanDao()
+                    .getGroupNopol("")
+                    .collectLatest { list ->
+                        groupAdapter.updateData(list)
+                        hideAddFromSearchButton()
+                    }
 
                 return@launch
             }
 
-            val isNumeric = cleanQuery.all { it.isDigit() }
+            val isNumeric = cleanQuery.all {
+                it.isDigit()
+            }
 
             when {
-                // 1-3 angka = tetap tampil group
+                // 1–3 angka tetap menampilkan daftar group.
                 isNumeric && cleanQuery.length < 4 -> {
                     binding.tvSearchLabel.visibility = View.VISIBLE
                     binding.tvSearchLabel.text = "Hasil Group"
                     binding.rvGroup.adapter = groupAdapter
 
-                    db.kendaraanDao().getGroupNopol(cleanQuery).collectLatest {
-                        groupAdapter.updateData(it)
-                    }
+                    db.kendaraanDao()
+                        .getGroupNopol(cleanQuery)
+                        .collectLatest { list ->
+                            groupAdapter.updateData(list)
+
+                            updateAddFromSearchButton(
+                                query = cleanQuery,
+                                resultKosong = list.isEmpty()
+                            )
+                        }
                 }
 
-                // 4 angka = khusus data nopol group itu saja
+                // Tepat 4 angka menampilkan kendaraan pada group tersebut.
                 isNumeric && cleanQuery.length == 4 -> {
                     binding.tvSearchLabel.visibility = View.VISIBLE
                     binding.tvSearchLabel.text = "Hasil Data"
                     binding.rvGroup.adapter = nopolAdapter
 
-                    db.kendaraanDao().getKendaraanByGroup(cleanQuery, "").collectLatest {
-                        nopolAdapter.updateData(NopolFormatter.sortList(it))
-                    }
+                    db.kendaraanDao()
+                        .getKendaraanByGroup(
+                            cleanQuery,
+                            ""
+                        )
+                        .collectLatest { list ->
+                            nopolAdapter.updateData(
+                                NopolFormatter.sortList(list)
+                            )
+
+                            updateAddFromSearchButton(
+                                query = cleanQuery,
+                                resultKosong = list.isEmpty()
+                            )
+                        }
                 }
+
                 else -> {
                     binding.tvSearchLabel.visibility = View.VISIBLE
                     binding.tvSearchLabel.text = "Hasil Data"
                     binding.rvGroup.adapter = nopolAdapter
 
-                    val normalized = normalizeSearchText(cleanQuery)
+                    val normalized =
+                        normalizeSearchText(cleanQuery)
 
-                    val nopolPattern = Regex("^(\\d{1,4})([A-Z]{1,3})$")
-                    val nopolMatch = nopolPattern.matchEntire(normalized)
+                    /*
+                     * Contoh:
+                     * 484D, 0009DD, 8224ABC
+                     *
+                     * Pencarian dibatasi ke group angkanya agar hasil
+                     * no rangka/no mesin tidak ikut masuk.
+                     */
+                    val nopolPattern = Regex(
+                        "^(\\d{1,4})([A-Z]{1,4})$"
+                    )
+
+                    val nopolMatch =
+                        nopolPattern.matchEntire(normalized)
 
                     if (nopolMatch != null) {
-                        val angkaPart = nopolMatch.groupValues[1]
-                        val hurufPart = nopolMatch.groupValues[2]
+                        val angkaPart =
+                            nopolMatch.groupValues[1]
 
-                        val angkaRapi = angkaPart.padStart(4, '0')
-                        val targetNopolKey = angkaRapi + hurufPart
+                        val hurufPart =
+                            nopolMatch.groupValues[2]
 
-                        db.kendaraanDao().getKendaraanByGroup(angkaPart, "").collectLatest { list ->
-                            val filtered = list.filter { kendaraan ->
-                                val displayKey = normalizeSearchText(
-                                    NopolFormatter.display(kendaraan.nopol)
+                        val angkaRapi =
+                            angkaPart.padStart(4, '0')
+
+                        val targetNopolKey =
+                            angkaRapi + hurufPart
+
+                        db.kendaraanDao()
+                            .getKendaraanByGroup(
+                                angkaPart,
+                                ""
+                            )
+                            .collectLatest { list ->
+
+                                val filtered = list.filter { kendaraan ->
+                                    val displayKey =
+                                        normalizeSearchText(
+                                            NopolFormatter.display(
+                                                kendaraan.nopol
+                                            )
+                                        )
+
+                                    val rawKey =
+                                        normalizeSearchText(
+                                            kendaraan.nopol
+                                        )
+
+                                    displayKey.contains(targetNopolKey) ||
+                                            rawKey.contains(targetNopolKey) ||
+                                            rawKey.contains(normalized)
+                                }
+
+                                nopolAdapter.updateData(
+                                    NopolFormatter.sortList(filtered)
                                 )
 
-                                val rawKey = normalizeSearchText(kendaraan.nopol)
-
-                                displayKey.contains(targetNopolKey) ||
-                                        rawKey.contains(targetNopolKey) ||
-                                        rawKey.contains(normalized)
+                                updateAddFromSearchButton(
+                                    query = cleanQuery,
+                                    resultKosong = filtered.isEmpty()
+                                )
                             }
-
-                            nopolAdapter.updateData(NopolFormatter.sortList(filtered))
-                        }
                     } else {
-                        db.kendaraanDao().searchKendaraanSpesifik(normalized).collectLatest {
-                            nopolAdapter.updateData(NopolFormatter.sortList(it))
-                        }
+                        db.kendaraanDao()
+                            .searchKendaraanSpesifik(normalized)
+                            .collectLatest { list ->
+                                nopolAdapter.updateData(
+                                    NopolFormatter.sortList(list)
+                                )
+
+                                updateAddFromSearchButton(
+                                    query = cleanQuery,
+                                    resultKosong = list.isEmpty()
+                                )
+                            }
                     }
                 }
             }
@@ -178,9 +252,97 @@ class MainActivity : AppCompatActivity() {
             .trim()
     }
 
+    private fun updateAddFromSearchButton(
+        query: String,
+        resultKosong: Boolean
+    ) {
+        val normalized =
+            normalizeSearchText(query)
+
+        /*
+         * Bentuk yang dianggap mirip nopol:
+         *
+         * 8224
+         * B8224
+         * 8224ABC
+         * B8224ABC
+         * B 8224 ABC
+         */
+        val formatNopolValid = normalized.matches(
+            Regex("^[A-Z]{0,2}\\d{1,4}[A-Z]{0,4}$")
+        )
+
+        val jumlahAngka = normalized.count {
+            it.isDigit()
+        }
+
+        val adaHuruf = normalized.any {
+            it.isLetter()
+        }
+
+        /*
+         * Tombol muncul jika:
+         * - hasil pencarian kosong;
+         * - query berupa 4 angka, atau campuran angka dan huruf;
+         * - bentuknya masih masuk pola nomor polisi.
+         */
+        val bolehDitambahkan =
+            formatNopolValid &&
+                    (
+                            jumlahAngka == 4 ||
+                                    (jumlahAngka >= 1 && adaHuruf)
+                            )
+
+        binding.btnAddFromSearch.visibility =
+            if (
+                resultKosong &&
+                query.isNotBlank() &&
+                bolehDitambahkan
+            ) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+    }
+
+    private fun hideAddFromSearchButton() {
+        binding.btnAddFromSearch.visibility =
+            View.GONE
+    }
+
     private fun setupFab() {
+        // FAB lama: membuka Tambah Data dengan form kosong.
         binding.fabAdd.setOnClickListener {
-            startActivity(Intent(this, AddEditActivity::class.java))
+            startActivity(
+                Intent(
+                    this,
+                    AddEditActivity::class.java
+                )
+            )
+        }
+
+        // Tombol + baru: membawa isi field pencarian ke Nomor Polisi.
+        binding.btnAddFromSearch.setOnClickListener {
+            val nopolYangDiketik = binding.etSearch.text
+                .toString()
+                .trim()
+                .uppercase(Locale.getDefault())
+
+            if (nopolYangDiketik.isBlank()) {
+                return@setOnClickListener
+            }
+
+            val intent = Intent(
+                this,
+                AddEditActivity::class.java
+            ).apply {
+                putExtra(
+                    "PREFILL_NOPOL",
+                    nopolYangDiketik
+                )
+            }
+
+            startActivity(intent)
         }
     }
 
