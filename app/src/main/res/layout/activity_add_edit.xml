@@ -29,13 +29,17 @@
             android:textColor="@color/white_text"
             android:textSize="20sp"
             android:textStyle="bold" />
+
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/scrollForm"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:paddingBottom="100dp"
         android:clipToPadding="false"
+        android:fillViewport="true"
+        android:overScrollMode="ifContentScrolls"
+        android:paddingBottom="12dp"
         app:layout_constraintBottom_toTopOf="@id/btnSave"
         app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
@@ -114,6 +118,7 @@
                         android:paddingHorizontal="16dp"
                         android:textColor="@color/white_text"
                         android:textColorHint="@color/gray_text" />
+
                 </LinearLayout>
 
                 <View
@@ -144,7 +149,9 @@
                         android:paddingHorizontal="16dp"
                         android:textColor="@color/white_text"
                         android:textColorHint="@color/gray_text" />
+
                 </LinearLayout>
+
             </LinearLayout>
 
             <TextView
@@ -167,7 +174,6 @@
                 android:textColor="@color/white_text"
                 android:textColorHint="@color/gray_text" />
 
-            <!-- Field Cabang -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -218,6 +224,7 @@
                         android:paddingHorizontal="16dp"
                         android:textColor="@color/white_text"
                         android:textColorHint="@color/gray_text" />
+
                 </LinearLayout>
 
                 <View
@@ -248,7 +255,9 @@
                         android:paddingHorizontal="16dp"
                         android:textColor="@color/white_text"
                         android:textColorHint="@color/gray_text" />
+
                 </LinearLayout>
+
             </LinearLayout>
 
             <TextView
@@ -305,79 +314,51 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_item_rounded"
-                android:gravity="top"
+                android:gravity="top|start"
                 android:hint="Catatan tambahan..."
-                android:inputType="textMultiLine"
+                android:inputType="textCapSentences|textMultiLine"
                 android:minHeight="120dp"
                 android:padding="16dp"
+                android:scrollbars="vertical"
                 android:textColor="@color/white_text"
                 android:textColorHint="@color/gray_text" />
 
-<!--            <TextView-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="20dp"-->
-<!--                android:text="Visibilitas Data"-->
-<!--                android:textColor="@color/gray_text"-->
-<!--                android:textSize="12sp" />-->
-
-<!--            <RadioGroup-->
-<!--                android:id="@+id/rgVisibility"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="8dp"-->
-<!--                android:orientation="horizontal">-->
-
-<!--                <RadioButton-->
-<!--                    android:id="@+id/rbPrivate"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Privat"-->
-<!--                    android:textColor="@color/white_text"-->
-<!--                    android:buttonTint="@color/cyan_accent"-->
-<!--                    android:checked="true" />-->
-
-<!--                <RadioButton-->
-<!--                    android:id="@+id/rbPublish"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="24dp"-->
-<!--                    android:text="Publish"-->
-<!--                    android:textColor="@color/white_text"-->
-<!--                    android:buttonTint="@color/cyan_accent" />-->
-<!--            </RadioGroup>-->
+            <!-- Visibilitas data sementara dinonaktifkan -->
 
         </LinearLayout>
+
     </ScrollView>
-    <LinearLayout
-        android:id="@+id/keyboardContainer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:elevation="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSave"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
+        android:layout_width="140dp"
+        android:layout_height="48dp"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:text="Simpan"
+        android:textAllCaps="false"
         android:textColor="@color/black_bg"
         android:textStyle="bold"
         app:backgroundTint="@color/cyan_accent"
         app:cornerRadius="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:icon="@drawable/ic_save"
         app:iconGravity="textStart"
-        app:iconPadding="8dp"
-        app:iconTint="@color/black_bg" />
+        app:iconPadding="6dp"
+        app:iconTint="@color/black_bg"
+        app:layout_constraintBottom_toTopOf="@id/keyboardContainer"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/keyboardContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/black_bg"
+        android:elevation="12dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
