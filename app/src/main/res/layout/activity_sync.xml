@@ -304,14 +304,14 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@android:drawable/btn_star_big_off"
+                android:src="@drawable/ic_edit"
                 app:tint="@color/gray_text" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Favorit"
+                android:text="Catatan"
                 android:textColor="@color/gray_text"
                 android:textSize="10sp"
                 android:textStyle="bold"/>

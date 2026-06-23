@@ -35,7 +35,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="Favorit"
+                android:text="Catatan"
                 android:textColor="@color/white_text"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -44,6 +44,7 @@
         <LinearLayout
             android:id="@+id/layoutFavoriteTabs"
             android:layout_width="match_parent"
+            android:visibility="gone"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:gravity="center"
@@ -90,7 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:text="0 data favorit"
+            android:text="0 data catatan"
             android:textColor="@color/cyan_accent"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -113,7 +114,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Belum ada data favorit"
+        android:text="Belum ada data catatan"
         android:textColor="@color/gray_text"
         android:textSize="15sp"
         android:visibility="gone"
@@ -177,14 +178,14 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/btn_star_big_on"
+                android:src="@drawable/ic_edit"
                 app:tint="@color/cyan_accent" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Favorit"
+                android:text="Catatan"
                 android:textColor="@color/cyan_accent"
                 android:textSize="11sp"
                 android:textStyle="bold" />

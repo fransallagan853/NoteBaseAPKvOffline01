@@ -14,25 +14,17 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.notebaseapk.data.AppDatabase
-import com.notebaseapk.data.FavoriteVehicle
 import com.notebaseapk.data.Kendaraan
 import com.notebaseapk.databinding.ActivityDetailBinding
-import kotlinx.coroutines.launch
 import com.notebaseapk.util.NopolFormatter
-import android.content.res.ColorStateList
-import androidx.core.content.ContextCompat
+import kotlinx.coroutines.launch
 
 class DetailActivity : AppCompatActivity() {
-    private fun getNopolKey(k: Kendaraan): String {
-        return k.nopolKey.ifBlank {
-            NopolFormatter.generateNopolKey(k.nopol)
-        }
-    }
+
     private lateinit var binding: ActivityDetailBinding
     private lateinit var db: AppDatabase
     private var vehicleId: Int = -1
     private var kendaraan: Kendaraan? = null
-    private var isFavorite: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,22 +46,43 @@ class DetailActivity : AppCompatActivity() {
         setupActions()
     }
 
+    private fun getNopolKey(kendaraan: Kendaraan): String {
+        return kendaraan.nopolKey.ifBlank {
+            NopolFormatter.generateNopolKey(kendaraan.nopol)
+        }
+    }
+
     private fun setupSafeHeader() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
-            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val statusBarHeight = insets.getInsets(
+                WindowInsetsCompat.Type.statusBars()
+            ).top
+
             val extraPadding = (16 * resources.displayMetrics.density).toInt()
-            view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
+
+            view.setPadding(
+                view.paddingLeft,
+                statusBarHeight + extraPadding,
+                view.paddingRight,
+                view.paddingBottom
+            )
+
             insets
         }
     }
 
     private fun setupSafeActionLayout() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.actionLayout) { view, insets ->
-            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val navBarHeight = insets.getInsets(
+                WindowInsetsCompat.Type.navigationBars()
+            ).bottom
+
             val extraMargin = (16 * resources.displayMetrics.density).toInt()
             val params = view.layoutParams as ConstraintLayout.LayoutParams
+
             params.bottomMargin = navBarHeight + extraMargin
             view.layoutParams = params
+
             insets
         }
     }
@@ -99,8 +112,6 @@ class DetailActivity : AppCompatActivity() {
                 } else {
                     binding.editorInfoLayout.visibility = View.GONE
                 }
-
-                checkFavoriteStatus(it)
             } ?: run {
                 finish()
             }
@@ -125,113 +136,71 @@ class DetailActivity : AppCompatActivity() {
         binding.btnCopy.setOnClickListener {
             kendaraan?.let { copyToClipboard(it) }
         }
-
-        binding.btnFavorite.setOnClickListener {
-            kendaraan?.let { toggleFavorite(it) }
-        }
     }
 
-    private fun checkFavoriteStatus(k: Kendaraan) {
-        lifecycleScope.launch {
-            val count = db.favoriteVehicleDao().isFavorite(
-                nopolKey = getNopolKey(k),
-                nopol = k.nopol,
-                leasing = k.leasing,
-                cabang = k.cabang
-            )
-
-            isFavorite = count > 0
-            updateFavoriteButton()
-        }
-    }
-
-    private fun toggleFavorite(k: Kendaraan) {
-        lifecycleScope.launch {
-            val nopolKey = getNopolKey(k)
-
-            if (isFavorite) {
-                db.favoriteVehicleDao().deleteFavoriteByKey(
-                    nopolKey = nopolKey,
-                    nopol = k.nopol,
-                    leasing = k.leasing,
-                    cabang = k.cabang
-                )
-
-                isFavorite = false
-                Toast.makeText(this@DetailActivity, "Dihapus dari favorit", Toast.LENGTH_SHORT).show()
-            } else {
-                val favorite = FavoriteVehicle(
-                    nopolKey = nopolKey,
-                    nopol = k.nopol,
-                    leasing = k.leasing,
-                    cabang = k.cabang
-                )
-
-                db.favoriteVehicleDao().insertFavorite(favorite)
-
-                isFavorite = true
-                Toast.makeText(this@DetailActivity, "Ditambahkan ke favorit", Toast.LENGTH_SHORT).show()
-            }
-
-            updateFavoriteButton()
-        }
-    }
-
-    private fun updateFavoriteButton() {
-        binding.btnFavorite.setTextColor(
-            android.graphics.Color.parseColor("#FFC107")
-        )
-
-        if (isFavorite) {
-            binding.btnFavorite.text = "★"
-            binding.btnFavorite.contentDescription = "Hapus dari favorit"
-        } else {
-            binding.btnFavorite.text = "☆"
-            binding.btnFavorite.contentDescription = "Tambah ke favorit"
-        }
-    }
-
-    private fun buildShareText(it: Kendaraan): String {
-        val formattedNopol = NopolFormatter.display(it.nopol)
+    private fun buildShareText(item: Kendaraan): String {
+        val formattedNopol = NopolFormatter.display(item.nopol)
 
         var text = """
-    noteBase - Detail Data
+            noteBase - Detail Data
 
-    Nomor Polisi: $formattedNopol
-    Periode Data: ${it.periodeData.ifEmpty { "-" }}
-    Kendaraan: ${it.namaKendaraan}
-    Tahun: ${it.tahun.ifEmpty { "-" }}
-    Warna: ${it.warna.ifEmpty { "-" }}
-    Leasing: ${it.leasing}
-    Cabang: ${it.cabang.ifEmpty { "-" }}
-    No Rangka: ${it.noRangka.ifEmpty { "-" }}
-    No Mesin: ${it.noMesin.ifEmpty { "-" }}
-    Saldo: ${it.saldo.ifEmpty { "-" }}
-    Overdue/OVD: ${it.overdue.ifEmpty { "-" }}
-    Catatan: ${it.catatan.ifEmpty { "-" }}
-""".trimIndent()
+            Nomor Polisi: $formattedNopol
+            Periode Data: ${item.periodeData.ifEmpty { "-" }}
+            Kendaraan: ${item.namaKendaraan}
+            Tahun: ${item.tahun.ifEmpty { "-" }}
+            Warna: ${item.warna.ifEmpty { "-" }}
+            Leasing: ${item.leasing}
+            Cabang: ${item.cabang.ifEmpty { "-" }}
+            No Rangka: ${item.noRangka.ifEmpty { "-" }}
+            No Mesin: ${item.noMesin.ifEmpty { "-" }}
+            Saldo: ${item.saldo.ifEmpty { "-" }}
+            Overdue/OVD: ${item.overdue.ifEmpty { "-" }}
+            Catatan: ${item.catatan.ifEmpty { "-" }}
+        """.trimIndent()
 
-        if (!it.editorName.isNullOrEmpty()) {
-            text += "\n\nDiedit oleh:\nNama: ${it.editorName}\nNo Telp: ${it.editorPhone ?: "-"}"
+        if (!item.editorName.isNullOrEmpty()) {
+            text +=
+                "\n\nDiedit oleh:" +
+                        "\nNama: ${item.editorName}" +
+                        "\nNo Telp: ${item.editorPhone ?: "-"}"
         }
 
         return text
     }
 
-    private fun shareData(it: Kendaraan) {
-        val text = buildShareText(it)
+    private fun shareData(item: Kendaraan) {
+        val text = buildShareText(item)
         val intent = Intent(Intent.ACTION_SEND)
+
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_TEXT, text)
-        startActivity(Intent.createChooser(intent, "Bagikan data"))
+
+        startActivity(
+            Intent.createChooser(
+                intent,
+                "Bagikan data"
+            )
+        )
     }
 
-    private fun copyToClipboard(it: Kendaraan) {
-        val text = buildShareText(it)
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("Detail Data noteBase", text)
+    private fun copyToClipboard(item: Kendaraan) {
+        val text = buildShareText(item)
+
+        val clipboard =
+            getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+        val clip = ClipData.newPlainText(
+            "Detail Data noteBase",
+            text
+        )
+
         clipboard.setPrimaryClip(clip)
-        Toast.makeText(this, "Detail data disalin", Toast.LENGTH_SHORT).show()
+
+        Toast.makeText(
+            this,
+            "Detail data disalin",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun showDeleteDialog() {
@@ -243,6 +212,8 @@ class DetailActivity : AppCompatActivity() {
                     kendaraan?.let {
                         db.kendaraanDao().delete(it)
 
+                        // Favorit memang disembunyikan, tetapi data favorit lama
+                        // tetap dibersihkan saat kendaraan utamanya dihapus.
                         db.favoriteVehicleDao().deleteFavoriteByKey(
                             nopolKey = getNopolKey(it),
                             nopol = it.nopol,

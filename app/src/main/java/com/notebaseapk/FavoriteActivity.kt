@@ -1,12 +1,10 @@
 package com.notebaseapk
 
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -26,13 +24,6 @@ class FavoriteActivity : AppCompatActivity() {
     private lateinit var adapter: NopolAdapter
     private var observeJob: Job? = null
 
-    private enum class Mode {
-        FAVORIT,
-        CATATAN
-    }
-
-    private var currentMode = Mode.FAVORIT
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFavoriteBinding.inflate(layoutInflater)
@@ -45,9 +36,8 @@ class FavoriteActivity : AppCompatActivity() {
 
         setupSafeBottomNav()
         setupRecyclerView()
-        setupTabActions()
         setupBottomNav()
-        showFavorites()
+        showCatatan()
 
         binding.btnBack.setOnClickListener {
             finish()
@@ -56,7 +46,9 @@ class FavoriteActivity : AppCompatActivity() {
 
     private fun setupSafeBottomNav() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
-            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val navBarHeight = insets.getInsets(
+                WindowInsetsCompat.Type.navigationBars()
+            ).bottom
 
             val params = view.layoutParams as ConstraintLayout.LayoutParams
             params.bottomMargin = navBarHeight
@@ -77,57 +69,22 @@ class FavoriteActivity : AppCompatActivity() {
         binding.rvFavorite.adapter = adapter
     }
 
-    private fun setupTabActions() {
-        binding.tabFavorite.setOnClickListener {
-            showFavorites()
-        }
-
-        binding.tabCatatan.setOnClickListener {
-            showCatatan()
-        }
-    }
-
-    private fun showFavorites() {
-        currentMode = Mode.FAVORIT
-        updateTabUI()
-
-        observeJob?.cancel()
-        observeJob = lifecycleScope.launch {
-            db.favoriteVehicleDao().getFavoriteKendaraanList().collectLatest { list ->
-                showList(
-                    list = list,
-                    emptyText = "Belum ada data favorit",
-                    countSuffix = "data favorit"
-                )
-            }
-        }
-    }
-
     private fun showCatatan() {
-        currentMode = Mode.CATATAN
-        updateTabUI()
-
         observeJob?.cancel()
         observeJob = lifecycleScope.launch {
-            db.favoriteVehicleDao().getCatatanKendaraanList().collectLatest { list ->
-                showList(
-                    list = list,
-                    emptyText = "Belum ada data catatan",
-                    countSuffix = "data catatan"
-                )
-            }
+            db.favoriteVehicleDao()
+                .getCatatanKendaraanList()
+                .collectLatest { list ->
+                    showList(list)
+                }
         }
     }
 
-    private fun showList(
-        list: List<Kendaraan>,
-        emptyText: String,
-        countSuffix: String
-    ) {
+    private fun showList(list: List<Kendaraan>) {
         adapter.updateData(list)
 
         if (list.isEmpty()) {
-            binding.tvEmptyFavorite.text = emptyText
+            binding.tvEmptyFavorite.text = "Belum ada data catatan"
             binding.tvEmptyFavorite.visibility = View.VISIBLE
             binding.rvFavorite.visibility = View.GONE
         } else {
@@ -135,41 +92,21 @@ class FavoriteActivity : AppCompatActivity() {
             binding.rvFavorite.visibility = View.VISIBLE
         }
 
-        binding.tvFavoriteCount.text = "${list.size} $countSuffix"
-    }
-
-    private fun updateTabUI() {
-        val cyan = ContextCompat.getColor(this, R.color.cyan_accent)
-        val gray = ContextCompat.getColor(this, R.color.gray_text)
-
-        val isFavoriteActive = currentMode == Mode.FAVORIT
-        val isCatatanActive = currentMode == Mode.CATATAN
-
-        binding.tabFavorite.setTextColor(if (isFavoriteActive) cyan else gray)
-        binding.tabCatatan.setTextColor(if (isCatatanActive) cyan else gray)
-
-        binding.tabFavorite.setTypeface(
-            null,
-            if (isFavoriteActive) Typeface.BOLD else Typeface.NORMAL
-        )
-
-        binding.tabCatatan.setTypeface(
-            null,
-            if (isCatatanActive) Typeface.BOLD else Typeface.NORMAL
-        )
+        binding.tvFavoriteCount.text = "${list.size} data catatan"
     }
 
     private fun setupBottomNav() {
         binding.menuHome.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            intent.flags =
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
             overridePendingTransition(0, 0)
             finish()
         }
 
         binding.menuFavorite.setOnClickListener {
-            // Sudah di halaman Favorit
+            // Sudah berada di halaman Catatan.
         }
 
         binding.menuSync.setOnClickListener {
