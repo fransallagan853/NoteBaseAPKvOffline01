@@ -44,7 +44,7 @@ class SettingsActivity : AppCompatActivity() {
         updateUserUI()
 
         // Statistik jumlah data lokal
-        observeData()
+//        observeData()
     }
 
     private fun setupSafeHeader() {
