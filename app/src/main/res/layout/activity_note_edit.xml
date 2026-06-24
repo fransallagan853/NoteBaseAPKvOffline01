@@ -29,6 +29,7 @@
             android:textColor="@color/white_text"
             android:textSize="20sp"
             android:textStyle="bold" />
+
     </LinearLayout>
 
     <ScrollView
@@ -49,10 +50,10 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 android:background="@drawable/bg_item_rounded"
                 android:orientation="vertical"
-                android:padding="16dp"
-                android:layout_marginBottom="24dp">
+                android:padding="16dp">
 
                 <TextView
                     android:id="@+id/tvSummaryNopol"
@@ -80,6 +81,7 @@
                     android:text="-"
                     android:textColor="@color/gray_text"
                     android:textSize="12sp" />
+
             </LinearLayout>
 
             <TextView
@@ -103,61 +105,69 @@
                 android:textColor="@color/white_text"
                 android:textColorHint="@color/gray_text" />
 
-<!--            <TextView-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="24dp"-->
-<!--                android:text="Visibilitas Catatan"-->
-<!--                android:textColor="@color/gray_text"-->
-<!--                android:textSize="12sp" />-->
+            <!--
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Visibilitas Catatan"
+                android:textColor="@color/gray_text"
+                android:textSize="12sp" />
 
-<!--            <RadioGroup-->
-<!--                android:id="@+id/rgVisibility"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="8dp"-->
-<!--                android:orientation="horizontal">-->
+            <RadioGroup
+                android:id="@+id/rgVisibility"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
-<!--                <RadioButton-->
-<!--                    android:id="@+id/rbPrivate"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Privat"-->
-<!--                    android:textColor="@color/white_text"-->
-<!--                    android:buttonTint="@color/cyan_accent"-->
-<!--                    android:checked="true" />-->
+                <RadioButton
+                    android:id="@+id/rbPrivate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/cyan_accent"
+                    android:checked="true"
+                    android:text="Privat"
+                    android:textColor="@color/white_text" />
 
-<!--                <RadioButton-->
-<!--                    android:id="@+id/rbPublish"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="24dp"-->
-<!--                    android:text="Publish"-->
-<!--                    android:textColor="@color/white_text"-->
-<!--                    android:buttonTint="@color/cyan_accent" />-->
-<!--            </RadioGroup>-->
+                <RadioButton
+                    android:id="@+id/rbPublish"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:buttonTint="@color/cyan_accent"
+                    android:text="Publish"
+                    android:textColor="@color/white_text" />
 
-<!--            <TextView-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="8dp"-->
-<!--                android:text="* Mode Publish akan membagikan catatan ini ke publik dengan identitas Anda sebagai editor."-->
-<!--                android:textColor="@color/gray_text"-->
-<!--                android:textSize="10sp"-->
-<!--                android:fontStyle="italic" />-->
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontStyle="italic"
+                android:text="* Mode Publish akan membagikan catatan ini ke publik dengan identitas Anda sebagai editor."
+                android:textColor="@color/gray_text"
+                android:textSize="10sp" />
+            -->
 
         </LinearLayout>
+
     </ScrollView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSave"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
+        android:layout_width="wrap_content"
+        android:layout_height="46dp"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:text="Simpan Catatan"
         android:textColor="@color/black_bg"
+        android:textSize="13sp"
         android:textStyle="bold"
         app:backgroundTint="@color/cyan_accent"
         app:cornerRadius="8dp"
@@ -166,8 +176,7 @@
         app:iconGravity="textStart"
         app:iconPadding="8dp"
         app:iconTint="@color/black_bg"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 package com.notebaseapk
 
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -20,15 +21,26 @@ class NoteEditActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNoteEditBinding
     private lateinit var db: AppDatabase
+
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+
     private var vehicleId: Int = -1
     private var kendaraan: Kendaraan? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityNoteEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        /*
+         * Keyboard bawaan tetap digunakan.
+         * Posisi tombol diatur manual memakai inset IME.
+         */
+        window.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
+        )
 
         setupSafeHeader()
         setupSafeBottomButton()
@@ -54,29 +66,66 @@ class NoteEditActivity : AppCompatActivity() {
 
     private fun setupSafeHeader() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
-            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-            val extraPadding = (16 * resources.displayMetrics.density).toInt()
-            view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
+            val statusBarHeight =
+                insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+
+            val extraPadding =
+                (16 * resources.displayMetrics.density).toInt()
+
+            view.setPadding(
+                view.paddingLeft,
+                statusBarHeight + extraPadding,
+                view.paddingRight,
+                view.paddingBottom
+            )
+
             insets
         }
     }
 
     private fun setupSafeBottomButton() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.btnSave) { view, insets ->
-            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-            val extraMargin = (16 * resources.displayMetrics.density).toInt()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
 
-            val params = view.layoutParams as ConstraintLayout.LayoutParams
-            params.bottomMargin = navBarHeight + extraMargin
-            view.layoutParams = params
+            val imeBottom = insets.getInsets(
+                WindowInsetsCompat.Type.ime()
+            ).bottom
+
+            val navigationBottom = insets.getInsets(
+                WindowInsetsCompat.Type.navigationBars()
+            ).bottom
+
+            val keyboardTerbuka = insets.isVisible(
+                WindowInsetsCompat.Type.ime()
+            )
+
+            val marginKeyboard =
+                (8 * resources.displayMetrics.density).toInt()
+
+            val marginNormal =
+                (16 * resources.displayMetrics.density).toInt()
+
+            val params =
+                binding.btnSave.layoutParams as ConstraintLayout.LayoutParams
+
+            params.bottomMargin =
+                if (keyboardTerbuka) {
+                    imeBottom + marginKeyboard
+                } else {
+                    navigationBottom + marginNormal
+                }
+
+            binding.btnSave.layoutParams = params
 
             insets
         }
+
+        ViewCompat.requestApplyInsets(binding.root)
     }
 
     private fun loadVehicleData() {
         lifecycleScope.launch {
-            kendaraan = db.kendaraanDao().getKendaraanById(vehicleId)
+            kendaraan = db.kendaraanDao()
+                .getKendaraanById(vehicleId)
 
             kendaraan?.let {
                 binding.tvSummaryNopol.text = it.nopol
@@ -90,25 +139,44 @@ class NoteEditActivity : AppCompatActivity() {
     }
 
     private fun saveNote() {
-        val noteText = binding.etCatatan.text.toString().trim()
+        val noteText =
+            binding.etCatatan.text.toString().trim()
 
-//        FITUR VISIBILITAS PRIVAT / PUBLISH DIMATIKAN SEMENTARA
-//        val isPublish = binding.rbPublish.isChecked
+        // FITUR VISIBILITAS PRIVAT / PUBLISH DIMATIKAN SEMENTARA
 
-//        if (isPublish) {
-//            publishNote(noteText)
-//        } else {
-            saveLocally(noteText, null, null)
-            Toast.makeText(this, "Catatan pribadi berhasil disimpan", Toast.LENGTH_SHORT).show()
-            finish()
-//        }
+        // val isPublish = binding.rbPublish.isChecked
+
+        // if (isPublish) {
+        //     publishNote(noteText)
+        // } else {
+
+        saveLocally(
+            noteText,
+            null,
+            null
+        )
+
+        Toast.makeText(
+            this,
+            "Catatan pribadi berhasil disimpan",
+            Toast.LENGTH_SHORT
+        ).show()
+
+        finish()
+
+        // }
     }
 
     private fun publishNote(noteText: String) {
         val user = auth.currentUser
 
         if (user == null) {
-            Toast.makeText(this, "Silakan login terlebih dahulu untuk publish catatan", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Silakan login terlebih dahulu untuk publish catatan",
+                Toast.LENGTH_SHORT
+            ).show()
+
             return
         }
 
@@ -120,7 +188,12 @@ class NoteEditActivity : AppCompatActivity() {
                     .await()
 
                 if (!userDoc.exists()) {
-                    Toast.makeText(this@NoteEditActivity, "Data user tidak ditemukan", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@NoteEditActivity,
+                        "Data user tidak ditemukan",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
                     return@launch
                 }
 
@@ -134,6 +207,7 @@ class NoteEditActivity : AppCompatActivity() {
                         "Lengkapi profil terlebih dahulu sebelum publish catatan",
                         Toast.LENGTH_SHORT
                     ).show()
+
                     return@launch
                 }
 
@@ -155,9 +229,18 @@ class NoteEditActivity : AppCompatActivity() {
                     .add(publicNote)
                     .await()
 
-                saveLocally(noteText, name, phone)
+                saveLocally(
+                    noteText,
+                    name,
+                    phone
+                )
 
-                Toast.makeText(this@NoteEditActivity, "Catatan berhasil dipublish", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@NoteEditActivity,
+                    "Catatan berhasil dipublish",
+                    Toast.LENGTH_SHORT
+                ).show()
+
                 finish()
 
             } catch (e: Exception) {
@@ -170,12 +253,17 @@ class NoteEditActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveLocally(noteText: String, editorName: String?, editorPhone: String?) {
+    private fun saveLocally(
+        noteText: String,
+        editorName: String?,
+        editorPhone: String?
+    ) {
         lifecycleScope.launch {
             kendaraan?.let {
                 it.catatan = noteText
                 it.editorName = editorName
                 it.editorPhone = editorPhone
+
                 db.kendaraanDao().update(it)
             }
         }
