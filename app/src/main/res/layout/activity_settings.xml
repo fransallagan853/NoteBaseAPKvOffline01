@@ -172,13 +172,13 @@
                 android:textColor="@color/cyan_accent"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:visibility="gone"/>
+                android:visibility="visible"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:cardBackgroundColor="@color/charcoal_bg"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
