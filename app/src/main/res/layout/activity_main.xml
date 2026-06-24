@@ -131,6 +131,21 @@
         app:layout_constraintTop_toBottomOf="@id/tvSearchLabel"
         tools:listitem="@layout/item_nopol_group" />
 
+    <!-- Informasi jika data tidak ditemukan -->
+    <TextView
+        android:id="@+id/tvEmptyData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="Data tidak ditemukan"
+        android:textColor="@color/gray_text"
+        android:textSize="14sp"
+        android:textStyle="italic"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSearchLabel" />
+
     <!-- Dynamic Custom Keyboard Container -->
     <LinearLayout
         android:id="@+id/keyboardContainer"

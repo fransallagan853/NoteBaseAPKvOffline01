@@ -97,8 +97,10 @@ class MainActivity : AppCompatActivity() {
             val cleanQuery = query.trim()
 
             hideAddFromSearchButton()
+            hideEmptyState()
 
             if (cleanQuery.isBlank()) {
+                hideEmptyState()
                 binding.tvSearchLabel.visibility = View.GONE
                 binding.rvGroup.adapter = groupAdapter
 
@@ -127,7 +129,10 @@ class MainActivity : AppCompatActivity() {
                         .getGroupNopol(cleanQuery)
                         .collectLatest { list ->
                             groupAdapter.updateData(list)
-
+                            updateEmptyState(
+                                query = cleanQuery,
+                                resultKosong = list.isEmpty()
+                            )
                             updateAddFromSearchButton(
                                 query = cleanQuery,
                                 resultKosong = list.isEmpty()
@@ -150,7 +155,10 @@ class MainActivity : AppCompatActivity() {
                             nopolAdapter.updateData(
                                 NopolFormatter.sortList(list)
                             )
-
+                            updateEmptyState(
+                                query = cleanQuery,
+                                resultKosong = list.isEmpty()
+                            )
                             updateAddFromSearchButton(
                                 query = cleanQuery,
                                 resultKosong = list.isEmpty()
@@ -221,7 +229,10 @@ class MainActivity : AppCompatActivity() {
                                 nopolAdapter.updateData(
                                     NopolFormatter.sortList(filtered)
                                 )
-
+                                updateEmptyState(
+                                    query = cleanQuery,
+                                    resultKosong = filtered.isEmpty()
+                                )
                                 updateAddFromSearchButton(
                                     query = cleanQuery,
                                     resultKosong = filtered.isEmpty()
@@ -234,7 +245,10 @@ class MainActivity : AppCompatActivity() {
                                 nopolAdapter.updateData(
                                     NopolFormatter.sortList(list)
                                 )
-
+                                updateEmptyState(
+                                    query = cleanQuery,
+                                    resultKosong = list.isEmpty()
+                                )
                                 updateAddFromSearchButton(
                                     query = cleanQuery,
                                     resultKosong = list.isEmpty()
@@ -250,6 +264,22 @@ class MainActivity : AppCompatActivity() {
         return text.uppercase(Locale.getDefault())
             .replace("[^A-Z0-9]".toRegex(), "")
             .trim()
+    }
+
+    private fun updateEmptyState(
+        query: String,
+        resultKosong: Boolean
+    ) {
+        binding.tvEmptyData.visibility =
+            if (query.isNotBlank() && resultKosong) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+    }
+
+    private fun hideEmptyState() {
+        binding.tvEmptyData.visibility = View.GONE
     }
 
     private fun updateAddFromSearchButton(
