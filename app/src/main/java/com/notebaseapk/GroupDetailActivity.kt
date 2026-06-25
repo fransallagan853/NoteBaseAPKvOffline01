@@ -34,7 +34,7 @@ class GroupDetailActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupSafeHeader()
-        
+        binding.headerLayout.applyStatusBarPadding()
         groupNumber = intent.getStringExtra("GROUP_NUMBER") ?: ""
         db = AppDatabase.getDatabase(this)
 

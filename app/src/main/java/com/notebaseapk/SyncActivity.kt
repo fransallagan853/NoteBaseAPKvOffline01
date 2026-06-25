@@ -77,7 +77,7 @@ class SyncActivity : AppCompatActivity() {
     private fun setupSafeHeader() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
             val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-            val extraPadding = (16 * resources.displayMetrics.density).toInt()
+            val extraPadding = (8 * resources.displayMetrics.density).toInt()
             view.setPadding(view.paddingLeft, statusBarHeight + extraPadding, view.paddingRight, view.paddingBottom)
             insets
         }

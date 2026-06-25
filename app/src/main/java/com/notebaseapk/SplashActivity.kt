@@ -10,12 +10,23 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.notebaseapk.databinding.ActivitySplashBinding
 
 class SplashActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivitySplashBinding
+
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        /*
+         * Tema harus diterapkan sebelum super.onCreate()
+         * agar Splash dan halaman berikutnya tidak berkedip
+         * dari light ke dark atau sebaliknya.
+         */
+        ThemeManager.applySavedTheme(this)
+
         super.onCreate(savedInstanceState)
+
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -26,24 +37,51 @@ class SplashActivity : AppCompatActivity() {
 
     private fun checkLoginStatus() {
         val currentUser = auth.currentUser
+
         if (currentUser == null) {
-            // Not logged in
-            startActivity(Intent(this, LoginActivity::class.java))
+            startActivity(
+                Intent(
+                    this,
+                    LoginActivity::class.java
+                )
+            )
+
             finish()
         } else {
-            // Logged in, check if profile is complete (has phone)
-            db.collection("users").document(currentUser.uid).get()
+            db.collection("users")
+                .document(currentUser.uid)
+                .get()
                 .addOnSuccessListener { document ->
-                    if (document.exists() && document.contains("phone")) {
-                        startActivity(Intent(this, MainActivity::class.java))
+
+                    if (
+                        document.exists() &&
+                        document.contains("phone")
+                    ) {
+                        startActivity(
+                            Intent(
+                                this,
+                                MainActivity::class.java
+                            )
+                        )
                     } else {
-                        startActivity(Intent(this, CompleteProfileActivity::class.java))
+                        startActivity(
+                            Intent(
+                                this,
+                                CompleteProfileActivity::class.java
+                            )
+                        )
                     }
+
                     finish()
                 }
                 .addOnFailureListener {
-                    // Fallback to offline mode/Main if Firestore fails
-                    startActivity(Intent(this, MainActivity::class.java))
+                    startActivity(
+                        Intent(
+                            this,
+                            MainActivity::class.java
+                        )
+                    )
+
                     finish()
                 }
         }

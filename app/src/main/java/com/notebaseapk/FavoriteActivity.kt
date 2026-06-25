@@ -29,7 +29,7 @@ class FavoriteActivity : AppCompatActivity() {
         binding = ActivityFavoriteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.headerLayout.applyStatusBarPadding(16)
+        binding.headerLayout.applyStatusBarPadding(8)
         ViewCompat.requestApplyInsets(binding.headerLayout)
 
         db = AppDatabase.getDatabase(this)

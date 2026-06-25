@@ -70,7 +70,7 @@ class NoteEditActivity : AppCompatActivity() {
                 insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
 
             val extraPadding =
-                (16 * resources.displayMetrics.density).toInt()
+                (8 * resources.displayMetrics.density).toInt()
 
             view.setPadding(
                 view.paddingLeft,

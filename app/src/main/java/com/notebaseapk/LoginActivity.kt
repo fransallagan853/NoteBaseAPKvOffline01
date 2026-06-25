@@ -15,71 +15,163 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.notebaseapk.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
+
     private val db = FirebaseFirestore.getInstance()
 
-    private val signInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            firebaseAuthWithGoogle(account.idToken!!)
-        } catch (e: ApiException) {
-            Toast.makeText(this, "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+    private val signInLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+
+            val task =
+                GoogleSignIn.getSignedInAccountFromIntent(
+                    result.data
+                )
+
+            try {
+                val account =
+                    task.getResult(
+                        ApiException::class.java
+                    )!!
+
+                firebaseAuthWithGoogle(
+                    account.idToken!!
+                )
+            } catch (e: ApiException) {
+                Toast.makeText(
+                    this,
+                    "Google sign in failed: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        /*
+         * LoginActivity juga bisa dibuka langsung setelah logout,
+         * tanpa melewati SplashActivity.
+         */
+        ThemeManager.applySavedTheme(this)
+
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
+
+        binding =
+            ActivityLoginBinding.inflate(
+                layoutInflater
+            )
+
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
 
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id)) // Requires google-services.json
-            .requestEmail()
-            .build()
+        val gso =
+            GoogleSignInOptions.Builder(
+                GoogleSignInOptions.DEFAULT_SIGN_IN
+            )
+                .requestIdToken(
+                    getString(
+                        R.string.default_web_client_id
+                    )
+                )
+                .requestEmail()
+                .build()
 
-        googleSignInClient = GoogleSignIn.getClient(this, gso)
+        googleSignInClient =
+            GoogleSignIn.getClient(
+                this,
+                gso
+            )
 
         binding.btnGoogleSignIn.setOnClickListener {
-            signInLauncher.launch(googleSignInClient.signInIntent)
+            signInLauncher.launch(
+                googleSignInClient.signInIntent
+            )
         }
 
         binding.btnSkip.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            openMainAsNewRoot()
         }
     }
 
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
+    private fun firebaseAuthWithGoogle(
+        idToken: String
+    ) {
+        val credential =
+            GoogleAuthProvider.getCredential(
+                idToken,
+                null
+            )
+
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
+
                 if (task.isSuccessful) {
                     checkUserProfile()
                 } else {
-                    Toast.makeText(this, "Authentication Failed.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Authentication Failed.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
     }
 
     private fun checkUserProfile() {
-        val user = auth.currentUser ?: return
-        db.collection("users").document(user.uid).get()
+        val user =
+            auth.currentUser ?: return
+
+        db.collection("users")
+            .document(user.uid)
+            .get()
             .addOnSuccessListener { document ->
-                if (document.exists() && document.contains("phone")) {
-                    startActivity(Intent(this, MainActivity::class.java))
+
+                if (
+                    document.exists() &&
+                    document.contains("phone")
+                ) {
+                    openMainAsNewRoot()
                 } else {
-                    startActivity(Intent(this, CompleteProfileActivity::class.java))
+                    openCompleteProfileAsNewRoot()
                 }
-                finish()
             }
             .addOnFailureListener {
-                startActivity(Intent(this, CompleteProfileActivity::class.java))
-                finish()
+                openCompleteProfileAsNewRoot()
             }
+    }
+
+    private fun openMainAsNewRoot() {
+        val intent =
+            Intent(
+                this,
+                MainActivity::class.java
+            ).apply {
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+
+        startActivity(intent)
+        finish()
+    }
+
+    private fun openCompleteProfileAsNewRoot() {
+        val intent =
+            Intent(
+                this,
+                CompleteProfileActivity::class.java
+            ).apply {
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+
+        startActivity(intent)
+        finish()
     }
 }

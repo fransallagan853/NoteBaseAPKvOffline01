@@ -179,13 +179,13 @@
                 android:layout_height="60dp"
                 android:layout_marginTop="16dp"
                 android:text="Cek Update"
-                android:textColor="@color/black_bg"
+                android:textColor="@color/on_cyan_button"
                 android:textStyle="bold"
                 app:backgroundTint="@color/cyan_accent"
                 app:cornerRadius="12dp"
                 app:icon="@drawable/ic_sync"
                 app:iconGravity="textStart"
-                app:iconTint="@color/black_bg"
+                app:iconTint="@color/on_cyan_button"
                 app:iconPadding="8dp"
                 app:elevation="4dp" />
 
@@ -208,9 +208,9 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:visibility="gone"
-        app:cardBackgroundColor="#151A1F"
+        app:cardBackgroundColor="@color/charcoal_bg"
         app:cardCornerRadius="16dp"
-        app:strokeColor="#26323A"
+        app:strokeColor="@color/divider_color"
         app:strokeWidth="1dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -230,9 +230,9 @@
                 android:indeterminate="false"
                 android:max="100"
                 android:progress="0"
-                app:indicatorColor="#16D9EF"
+                app:indicatorColor="@color/cyan_accent"
                 app:indicatorSize="72dp"
-                app:trackColor="#26323A"
+                app:trackColor="@color/divider_color"
                 app:trackThickness="7dp" />
 
             <TextView
@@ -241,7 +241,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="0%"
-                android:textColor="#16D9EF"
+                android:textColor="@color/cyan_accent"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
@@ -251,7 +251,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="Menunggu sinkron..."
-                android:textColor="#A8B0B6"
+                android:textColor="@color/gray_text"
                 android:textSize="14sp" />
 
         </LinearLayout>
@@ -314,7 +314,7 @@
                 android:text="Catatan"
                 android:textColor="@color/gray_text"
                 android:textSize="10sp"
-                android:textStyle="bold"/>
+                />
         </LinearLayout>
 
         <LinearLayout

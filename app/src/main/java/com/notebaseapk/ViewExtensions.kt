@@ -9,7 +9,7 @@ import androidx.core.view.WindowInsetsCompat
  * Extension function untuk mengatur padding atas secara otomatis berdasarkan Status Bar (Notch).
  * Digunakan untuk Header agar responsif di semua jenis HP.
  */
-fun View.applyStatusBarPadding(extraPaddingDp: Int = 16) {
+fun View.applyStatusBarPadding(extraPaddingDp: Int = 8) {
     ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
         val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
         val extraPaddingPx = (extraPaddingDp * resources.displayMetrics.density).toInt()

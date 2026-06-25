@@ -58,7 +58,7 @@ class DetailActivity : AppCompatActivity() {
                 WindowInsetsCompat.Type.statusBars()
             ).top
 
-            val extraPadding = (16 * resources.displayMetrics.density).toInt()
+            val extraPadding = (8 * resources.displayMetrics.density).toInt()
 
             view.setPadding(
                 view.paddingLeft,
@@ -77,7 +77,7 @@ class DetailActivity : AppCompatActivity() {
                 WindowInsetsCompat.Type.navigationBars()
             ).bottom
 
-            val extraMargin = (16 * resources.displayMetrics.density).toInt()
+            val extraMargin = (8 * resources.displayMetrics.density).toInt()
             val params = view.layoutParams as ConstraintLayout.LayoutParams
 
             params.bottomMargin = navBarHeight + extraMargin

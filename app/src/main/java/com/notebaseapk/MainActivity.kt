@@ -13,13 +13,14 @@ import com.notebaseapk.adapter.GroupAdapter
 import com.notebaseapk.adapter.NopolAdapter
 import com.notebaseapk.data.AppDatabase
 import com.notebaseapk.databinding.ActivityMainBinding
+import com.notebaseapk.util.NopolFormatter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Locale
-import com.notebaseapk.util.NopolFormatter
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var db: AppDatabase
     private lateinit var groupAdapter: GroupAdapter
@@ -29,46 +30,91 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Clean & Responsive UI using Extensions
         binding.headerLayout.applyStatusBarPadding()
         binding.bottomNav.applyNavigationBarMargin()
         binding.keyboardContainer.applyNavigationBarMargin(4)
 
         db = AppDatabase.getDatabase(this)
+
         setupRecyclerViews()
         setupSearch()
         setupFab()
+        setupThemeToggle()
         setupMenu()
         setupBottomNav()
-        
+
         performSearch("")
     }
 
     override fun onStart() {
         super.onStart()
+
         if (::customKeyboardManager.isInitialized) {
             customKeyboardManager.refreshLayout()
         }
     }
 
+    private fun setupThemeToggle() {
+        updateThemeToggleIcon()
+
+        binding.btnThemeToggle.setOnClickListener {
+            ThemeManager.toggleTheme(this)
+        }
+    }
+
+    private fun updateThemeToggleIcon() {
+        val lightModeAktif =
+            ThemeManager.isLightMode(this)
+
+        if (lightModeAktif) {
+            binding.btnThemeToggle.text = "☾"
+            binding.btnThemeToggle.contentDescription =
+                "Aktifkan mode gelap"
+        } else {
+            binding.btnThemeToggle.text = "☀"
+            binding.btnThemeToggle.contentDescription =
+                "Aktifkan mode terang"
+        }
+    }
+
     private fun setupRecyclerViews() {
         groupAdapter = GroupAdapter(emptyList()) { group ->
-            val intent = Intent(this, GroupDetailActivity::class.java)
-            intent.putExtra("GROUP_NUMBER", group.groupNumber)
-            startActivity(intent)
-        }
-        
-        nopolAdapter = NopolAdapter(emptyList()) { kendaraan ->
-            val intent = Intent(this, DetailActivity::class.java)
-            intent.putExtra("VEHICLE_ID", kendaraan.id)
+            val intent = Intent(
+                this,
+                GroupDetailActivity::class.java
+            )
+
+            intent.putExtra(
+                "GROUP_NUMBER",
+                group.groupNumber
+            )
+
             startActivity(intent)
         }
 
-        binding.rvGroup.layoutManager = LinearLayoutManager(this)
-        binding.rvGroup.adapter = groupAdapter
+        nopolAdapter = NopolAdapter(emptyList()) { kendaraan ->
+            val intent = Intent(
+                this,
+                DetailActivity::class.java
+            )
+
+            intent.putExtra(
+                "VEHICLE_ID",
+                kendaraan.id
+            )
+
+            startActivity(intent)
+        }
+
+        binding.rvGroup.layoutManager =
+            LinearLayoutManager(this)
+
+        binding.rvGroup.adapter =
+            groupAdapter
     }
 
     private fun setupSearch() {
@@ -81,13 +127,34 @@ class MainActivity : AppCompatActivity() {
             listOf(binding.etSearch)
         )
 
-        binding.etSearch.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                performSearch(s.toString())
+        binding.etSearch.addTextChangedListener(
+            object : TextWatcher {
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int
+                ) {
+                    performSearch(
+                        s.toString()
+                    )
+                }
+
+                override fun afterTextChanged(
+                    s: Editable?
+                ) {
+                }
             }
-            override fun afterTextChanged(s: Editable?) {}
-        })
+        )
     }
 
     private fun performSearch(query: String) {
@@ -101,12 +168,17 @@ class MainActivity : AppCompatActivity() {
 
             if (cleanQuery.isBlank()) {
                 hideEmptyState()
-                binding.tvSearchLabel.visibility = View.GONE
-                binding.rvGroup.adapter = groupAdapter
+
+                binding.tvSearchLabel.visibility =
+                    View.GONE
+
+                binding.rvGroup.adapter =
+                    groupAdapter
 
                 db.kendaraanDao()
                     .getGroupNopol("")
                     .collectLatest { list ->
+
                         groupAdapter.updateData(list)
                         hideAddFromSearchButton()
                     }
@@ -119,20 +191,27 @@ class MainActivity : AppCompatActivity() {
             }
 
             when {
-                // 1–3 angka tetap menampilkan daftar group.
                 isNumeric && cleanQuery.length < 4 -> {
-                    binding.tvSearchLabel.visibility = View.VISIBLE
-                    binding.tvSearchLabel.text = "Hasil Group"
-                    binding.rvGroup.adapter = groupAdapter
+                    binding.tvSearchLabel.visibility =
+                        View.VISIBLE
+
+                    binding.tvSearchLabel.text =
+                        "Hasil Group"
+
+                    binding.rvGroup.adapter =
+                        groupAdapter
 
                     db.kendaraanDao()
                         .getGroupNopol(cleanQuery)
                         .collectLatest { list ->
+
                             groupAdapter.updateData(list)
+
                             updateEmptyState(
                                 query = cleanQuery,
                                 resultKosong = list.isEmpty()
                             )
+
                             updateAddFromSearchButton(
                                 query = cleanQuery,
                                 resultKosong = list.isEmpty()
@@ -140,11 +219,15 @@ class MainActivity : AppCompatActivity() {
                         }
                 }
 
-                // Tepat 4 angka menampilkan kendaraan pada group tersebut.
                 isNumeric && cleanQuery.length == 4 -> {
-                    binding.tvSearchLabel.visibility = View.VISIBLE
-                    binding.tvSearchLabel.text = "Hasil Data"
-                    binding.rvGroup.adapter = nopolAdapter
+                    binding.tvSearchLabel.visibility =
+                        View.VISIBLE
+
+                    binding.tvSearchLabel.text =
+                        "Hasil Data"
+
+                    binding.rvGroup.adapter =
+                        nopolAdapter
 
                     db.kendaraanDao()
                         .getKendaraanByGroup(
@@ -152,13 +235,16 @@ class MainActivity : AppCompatActivity() {
                             ""
                         )
                         .collectLatest { list ->
+
                             nopolAdapter.updateData(
                                 NopolFormatter.sortList(list)
                             )
+
                             updateEmptyState(
                                 query = cleanQuery,
                                 resultKosong = list.isEmpty()
                             )
+
                             updateAddFromSearchButton(
                                 query = cleanQuery,
                                 resultKosong = list.isEmpty()
@@ -167,20 +253,18 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 else -> {
-                    binding.tvSearchLabel.visibility = View.VISIBLE
-                    binding.tvSearchLabel.text = "Hasil Data"
-                    binding.rvGroup.adapter = nopolAdapter
+                    binding.tvSearchLabel.visibility =
+                        View.VISIBLE
+
+                    binding.tvSearchLabel.text =
+                        "Hasil Data"
+
+                    binding.rvGroup.adapter =
+                        nopolAdapter
 
                     val normalized =
                         normalizeSearchText(cleanQuery)
 
-                    /*
-                     * Contoh:
-                     * 484D, 0009DD, 8224ABC
-                     *
-                     * Pencarian dibatasi ke group angkanya agar hasil
-                     * no rangka/no mesin tidak ikut masuk.
-                     */
                     val nopolPattern = Regex(
                         "^(\\d{1,4})([A-Z]{1,4})$"
                     )
@@ -196,7 +280,10 @@ class MainActivity : AppCompatActivity() {
                             nopolMatch.groupValues[2]
 
                         val angkaRapi =
-                            angkaPart.padStart(4, '0')
+                            angkaPart.padStart(
+                                4,
+                                '0'
+                            )
 
                         val targetNopolKey =
                             angkaRapi + hurufPart
@@ -208,50 +295,73 @@ class MainActivity : AppCompatActivity() {
                             )
                             .collectLatest { list ->
 
-                                val filtered = list.filter { kendaraan ->
-                                    val displayKey =
-                                        normalizeSearchText(
-                                            NopolFormatter.display(
+                                val filtered =
+                                    list.filter { kendaraan ->
+
+                                        val displayKey =
+                                            normalizeSearchText(
+                                                NopolFormatter.display(
+                                                    kendaraan.nopol
+                                                )
+                                            )
+
+                                        val rawKey =
+                                            normalizeSearchText(
                                                 kendaraan.nopol
                                             )
-                                        )
 
-                                    val rawKey =
-                                        normalizeSearchText(
-                                            kendaraan.nopol
-                                        )
-
-                                    displayKey.contains(targetNopolKey) ||
-                                            rawKey.contains(targetNopolKey) ||
-                                            rawKey.contains(normalized)
-                                }
+                                        displayKey.contains(
+                                            targetNopolKey
+                                        ) ||
+                                                rawKey.contains(
+                                                    targetNopolKey
+                                                ) ||
+                                                rawKey.contains(
+                                                    normalized
+                                                )
+                                    }
 
                                 nopolAdapter.updateData(
-                                    NopolFormatter.sortList(filtered)
+                                    NopolFormatter.sortList(
+                                        filtered
+                                    )
                                 )
+
                                 updateEmptyState(
                                     query = cleanQuery,
-                                    resultKosong = filtered.isEmpty()
+                                    resultKosong =
+                                        filtered.isEmpty()
                                 )
+
                                 updateAddFromSearchButton(
                                     query = cleanQuery,
-                                    resultKosong = filtered.isEmpty()
+                                    resultKosong =
+                                        filtered.isEmpty()
                                 )
                             }
                     } else {
                         db.kendaraanDao()
-                            .searchKendaraanSpesifik(normalized)
+                            .searchKendaraanSpesifik(
+                                normalized
+                            )
                             .collectLatest { list ->
+
                                 nopolAdapter.updateData(
-                                    NopolFormatter.sortList(list)
+                                    NopolFormatter.sortList(
+                                        list
+                                    )
                                 )
+
                                 updateEmptyState(
                                     query = cleanQuery,
-                                    resultKosong = list.isEmpty()
+                                    resultKosong =
+                                        list.isEmpty()
                                 )
+
                                 updateAddFromSearchButton(
                                     query = cleanQuery,
-                                    resultKosong = list.isEmpty()
+                                    resultKosong =
+                                        list.isEmpty()
                                 )
                             }
                     }
@@ -260,9 +370,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun normalizeSearchText(text: String): String {
-        return text.uppercase(Locale.getDefault())
-            .replace("[^A-Z0-9]".toRegex(), "")
+    private fun normalizeSearchText(
+        text: String
+    ): String {
+        return text
+            .uppercase(Locale.getDefault())
+            .replace(
+                "[^A-Z0-9]".toRegex(),
+                ""
+            )
             .trim()
     }
 
@@ -271,7 +387,10 @@ class MainActivity : AppCompatActivity() {
         resultKosong: Boolean
     ) {
         binding.tvEmptyData.visibility =
-            if (query.isNotBlank() && resultKosong) {
+            if (
+                query.isNotBlank() &&
+                resultKosong
+            ) {
                 View.VISIBLE
             } else {
                 View.GONE
@@ -279,7 +398,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hideEmptyState() {
-        binding.tvEmptyData.visibility = View.GONE
+        binding.tvEmptyData.visibility =
+            View.GONE
     }
 
     private fun updateAddFromSearchButton(
@@ -289,38 +409,31 @@ class MainActivity : AppCompatActivity() {
         val normalized =
             normalizeSearchText(query)
 
-        /*
-         * Bentuk yang dianggap mirip nopol:
-         *
-         * 8224
-         * B8224
-         * 8224ABC
-         * B8224ABC
-         * B 8224 ABC
-         */
-        val formatNopolValid = normalized.matches(
-            Regex("^[A-Z]{0,2}\\d{1,4}[A-Z]{0,4}$")
-        )
+        val formatNopolValid =
+            normalized.matches(
+                Regex(
+                    "^[A-Z]{0,2}\\d{1,4}[A-Z]{0,4}$"
+                )
+            )
 
-        val jumlahAngka = normalized.count {
-            it.isDigit()
-        }
+        val jumlahAngka =
+            normalized.count {
+                it.isDigit()
+            }
 
-        val adaHuruf = normalized.any {
-            it.isLetter()
-        }
+        val adaHuruf =
+            normalized.any {
+                it.isLetter()
+            }
 
-        /*
-         * Tombol muncul jika:
-         * - hasil pencarian kosong;
-         * - query berupa 4 angka, atau campuran angka dan huruf;
-         * - bentuknya masih masuk pola nomor polisi.
-         */
         val bolehDitambahkan =
             formatNopolValid &&
                     (
                             jumlahAngka == 4 ||
-                                    (jumlahAngka >= 1 && adaHuruf)
+                                    (
+                                            jumlahAngka >= 1 &&
+                                                    adaHuruf
+                                            )
                             )
 
         binding.btnAddFromSearch.visibility =
@@ -341,7 +454,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupFab() {
-        // FAB lama: membuka Tambah Data dengan form kosong.
         binding.fabAdd.setOnClickListener {
             startActivity(
                 Intent(
@@ -351,12 +463,14 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        // Tombol + baru: membawa isi field pencarian ke Nomor Polisi.
         binding.btnAddFromSearch.setOnClickListener {
-            val nopolYangDiketik = binding.etSearch.text
-                .toString()
-                .trim()
-                .uppercase(Locale.getDefault())
+            val nopolYangDiketik =
+                binding.etSearch.text
+                    .toString()
+                    .trim()
+                    .uppercase(
+                        Locale.getDefault()
+                    )
 
             if (nopolYangDiketik.isBlank()) {
                 return@setOnClickListener
@@ -378,16 +492,41 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupMenu() {
         binding.btnMenu.setOnClickListener { view ->
-            val popup = PopupMenu(this, view)
-            popup.menu.add("Pengaturan Keyboard")
-            popup.menu.add("Pengaturan Aplikasi")
+            val popup =
+                PopupMenu(this, view)
+
+            popup.menu.add(
+                "Pengaturan Keyboard"
+            )
+
+            popup.menu.add(
+                "Pengaturan Aplikasi"
+            )
+
             popup.setOnMenuItemClickListener { item ->
                 when (item.title) {
-                    "Pengaturan Keyboard" -> startActivity(Intent(this, KeyboardSettingsActivity::class.java))
-                    "Pengaturan Aplikasi" -> startActivity(Intent(this, SettingsActivity::class.java))
+                    "Pengaturan Keyboard" -> {
+                        startActivity(
+                            Intent(
+                                this,
+                                KeyboardSettingsActivity::class.java
+                            )
+                        )
+                    }
+
+                    "Pengaturan Aplikasi" -> {
+                        startActivity(
+                            Intent(
+                                this,
+                                SettingsActivity::class.java
+                            )
+                        )
+                    }
                 }
+
                 true
             }
+
             popup.show()
         }
     }
@@ -396,23 +535,57 @@ class MainActivity : AppCompatActivity() {
         binding.menuHome.setOnClickListener {
             performSearch("")
         }
+
         binding.menuFavorite.setOnClickListener {
-            startActivity(Intent(this, FavoriteActivity::class.java))
-            overridePendingTransition(0, 0)
+            startActivity(
+                Intent(
+                    this,
+                    FavoriteActivity::class.java
+                )
+            )
+
+            overridePendingTransition(
+                0,
+                0
+            )
         }
+
         binding.menuSync.setOnClickListener {
-            startActivity(Intent(this, SyncActivity::class.java))
-            overridePendingTransition(0, 0)
+            startActivity(
+                Intent(
+                    this,
+                    SyncActivity::class.java
+                )
+            )
+
+            overridePendingTransition(
+                0,
+                0
+            )
         }
+
         binding.menuSettings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-            overridePendingTransition(0, 0)
+            startActivity(
+                Intent(
+                    this,
+                    SettingsActivity::class.java
+                )
+            )
+
+            overridePendingTransition(
+                0,
+                0
+            )
         }
     }
 
-
     override fun onResume() {
         super.onResume()
-        performSearch(binding.etSearch.text.toString())
+
+        updateThemeToggleIcon()
+
+        performSearch(
+            binding.etSearch.text.toString()
+        )
     }
 }

@@ -42,7 +42,21 @@
                     android:textSize="11sp"
                     android:alpha="0.8" />
             </LinearLayout>
-
+            <TextView
+                android:id="@+id/btnThemeToggle"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="4dp"
+                android:layout_toStartOf="@id/btnMenu"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="Ganti tema"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="☀"
+                android:textColor="@color/cyan_accent"
+                android:textSize="22sp" />
             <ImageView
                 android:id="@+id/btnMenu"
                 android:layout_width="32dp"
@@ -93,11 +107,11 @@
                 android:padding="0dp"
                 android:text="+"
                 android:textAllCaps="false"
-                android:textColor="@color/black_bg"
+                android:textColor="@color/on_cyan_button"
                 android:textSize="28sp"
                 android:textStyle="bold"
                 android:visibility="gone"
-                app:backgroundTint="@android:color/white"
+                app:backgroundTint="@android:color/darker_gray"
                 app:cornerRadius="12dp" />
 
         </LinearLayout>
@@ -234,7 +248,7 @@
                 android:text="Catatan"
                 android:textColor="@color/gray_text"
                 android:textSize="10sp"
-                android:textStyle="bold"/>
+                />
         </LinearLayout>
 
         <LinearLayout

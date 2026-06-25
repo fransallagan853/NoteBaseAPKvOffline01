@@ -33,12 +33,16 @@ class SettingsActivity : AppCompatActivity() {
         setupSafeHeader()
         setupSafeBottomNav()
 
+        binding.headerLayout.applyStatusBarPadding()
+        binding.bottomNav.applyNavigationBarMargin()
+
         db = AppDatabase.getDatabase(this)
 
         binding.btnBack.setOnClickListener {
             finish()
         }
 
+        setupThemeSetting()
         setupActions()
         setupBottomNav()
         updateUserUI()
@@ -82,6 +86,28 @@ class SettingsActivity : AppCompatActivity() {
             view.layoutParams = params
 
             insets
+        }
+    }
+
+    private fun setupThemeSetting() {
+        binding.switchLightMode.isChecked =
+            ThemeManager.isLightMode(this)
+
+        binding.switchLightMode.setOnCheckedChangeListener { _, isChecked ->
+            val modeSaatIni =
+                ThemeManager.isLightMode(this)
+
+            if (modeSaatIni != isChecked) {
+                ThemeManager.setLightMode(
+                    context = this,
+                    enabled = isChecked
+                )
+            }
+        }
+
+        binding.cardThemeSetting.setOnClickListener {
+            binding.switchLightMode.isChecked =
+                !binding.switchLightMode.isChecked
         }
     }
 

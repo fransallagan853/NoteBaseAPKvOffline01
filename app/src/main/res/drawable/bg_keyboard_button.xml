@@ -4,22 +4,30 @@
     <!-- Saat tombol ditekan -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <solid android:color="#1E3A46" />
+
+            <solid android:color="@color/keyboard_button_pressed" />
+
             <stroke
                 android:width="1dp"
                 android:color="@color/cyan_accent" />
+
             <corners android:radius="8dp" />
+
         </shape>
     </item>
 
-    <!-- Normal -->
+    <!-- Kondisi normal -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#151A1F" />
+
+            <solid android:color="@color/keyboard_button_bg" />
+
             <stroke
                 android:width="1dp"
-                android:color="#2A3A42" />
+                android:color="@color/keyboard_button_stroke" />
+
             <corners android:radius="8dp" />
+
         </shape>
     </item>
 
