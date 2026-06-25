@@ -59,7 +59,7 @@ class SettingsActivity : AppCompatActivity() {
                 .top
 
             val extraPadding =
-                (16 * resources.displayMetrics.density).toInt()
+                (8 * resources.displayMetrics.density).toInt()
 
             view.setPadding(
                 view.paddingLeft,

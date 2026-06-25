@@ -95,7 +95,7 @@ class AddEditActivity : AppCompatActivity() {
                 WindowInsetsCompat.Type.statusBars()
             ).top
 
-            val extraPadding = dpToPx(16)
+            val extraPadding = dpToPx(8)
 
             view.setPadding(
                 view.paddingLeft,
@@ -111,8 +111,8 @@ class AddEditActivity : AppCompatActivity() {
     }
 
     private fun setupSafeSaveButton() {
-        val normalBottomMargin = dpToPx(16)
-        val keyboardBottomMargin = dpToPx(4)
+        val normalBottomMargin = dpToPx(8)
+        val keyboardBottomMargin = dpToPx(3)
 
         fun updateSaveButtonPosition() {
             val params = binding.btnSave.layoutParams
