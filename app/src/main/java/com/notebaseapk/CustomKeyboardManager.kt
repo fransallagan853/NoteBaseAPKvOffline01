@@ -47,7 +47,9 @@ class CustomKeyboardManager(
         registeredEditTexts.clear()
         registeredEditTexts.addAll(editTexts)
 
-        activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+        activity.window.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+        )
 
         setupLifecycleObserver()
         applyKeyboardBottomInset()
@@ -73,10 +75,10 @@ class CustomKeyboardManager(
                 }
             }
 
-            editText.setOnTouchListener { v, event ->
+            editText.setOnTouchListener { view, event ->
                 if (event.action == MotionEvent.ACTION_UP) {
                     activeEditText = editText
-                    v.requestFocus()
+                    view.requestFocus()
                     forceHideAndroidKeyboard(editText)
                     keyboardContainer.visibility = View.VISIBLE
 
@@ -88,6 +90,7 @@ class CustomKeyboardManager(
                         forceHideAndroidKeyboard(editText)
                     }, 350)
                 }
+
                 false
             }
         }
@@ -96,6 +99,7 @@ class CustomKeyboardManager(
     fun refreshLayout() {
         setupKeyboardLayout()
         disableAndroidKeyboardForAllFields()
+
         activeEditText?.let {
             forceHideAndroidKeyboard(it)
         }
@@ -103,6 +107,7 @@ class CustomKeyboardManager(
 
     fun hideKeyboard() {
         keyboardContainer.visibility = View.GONE
+
         activeEditText?.let {
             forceHideAndroidKeyboard(it)
             it.clearFocus()
@@ -113,50 +118,43 @@ class CustomKeyboardManager(
         if (lifecycleObserverAdded) return
 
         if (activity is LifecycleOwner) {
-            activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
-                override fun onResume(owner: LifecycleOwner) {
-                    disableAndroidKeyboardForAllFields()
+            activity.lifecycle.addObserver(
+                object : DefaultLifecycleObserver {
 
-                    mainHandler.postDelayed({
-                        val editText = activeEditText
+                    override fun onResume(owner: LifecycleOwner) {
+                        disableAndroidKeyboardForAllFields()
 
-                        if (editText != null && editText.hasFocus()) {
-                            forceHideAndroidKeyboard(editText)
-                            keyboardContainer.visibility = View.VISIBLE
-                        } else {
-                            forceHideAndroidKeyboard()
-                        }
-                    }, 80)
+                        mainHandler.postDelayed({
+                            restoreCustomKeyboardState()
+                        }, 80)
 
-                    mainHandler.postDelayed({
-                        val editText = activeEditText
+                        mainHandler.postDelayed({
+                            restoreCustomKeyboardState()
+                        }, 300)
 
-                        if (editText != null && editText.hasFocus()) {
-                            forceHideAndroidKeyboard(editText)
-                            keyboardContainer.visibility = View.VISIBLE
-                        } else {
-                            forceHideAndroidKeyboard()
-                        }
-                    }, 300)
+                        mainHandler.postDelayed({
+                            restoreCustomKeyboardState()
+                        }, 600)
+                    }
 
-                    mainHandler.postDelayed({
-                        val editText = activeEditText
-
-                        if (editText != null && editText.hasFocus()) {
-                            forceHideAndroidKeyboard(editText)
-                            keyboardContainer.visibility = View.VISIBLE
-                        } else {
-                            forceHideAndroidKeyboard()
-                        }
-                    }, 600)
+                    override fun onPause(owner: LifecycleOwner) {
+                        forceHideAndroidKeyboard()
+                    }
                 }
-
-                override fun onPause(owner: LifecycleOwner) {
-                    forceHideAndroidKeyboard()
-                }
-            })
+            )
 
             lifecycleObserverAdded = true
+        }
+    }
+
+    private fun restoreCustomKeyboardState() {
+        val editText = activeEditText
+
+        if (editText != null && editText.hasFocus()) {
+            forceHideAndroidKeyboard(editText)
+            keyboardContainer.visibility = View.VISIBLE
+        } else {
+            forceHideAndroidKeyboard()
         }
     }
 
@@ -166,23 +164,45 @@ class CustomKeyboardManager(
         }
     }
 
-    private fun forceHideAndroidKeyboard(view: View? = activity.currentFocus) {
+    private fun forceHideAndroidKeyboard(
+        view: View? = activity.currentFocus
+    ) {
         try {
-            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            val targetView = view ?: activity.currentFocus ?: keyboardContainer
-            imm.hideSoftInputFromWindow(targetView.windowToken, 0)
+            val inputMethodManager =
+                activity.getSystemService(
+                    Context.INPUT_METHOD_SERVICE
+                ) as InputMethodManager
+
+            val targetView =
+                view ?: activity.currentFocus ?: keyboardContainer
+
+            inputMethodManager.hideSoftInputFromWindow(
+                targetView.windowToken,
+                0
+            )
         } catch (_: Exception) {
         }
     }
 
     private fun applyKeyboardBottomInset() {
-        ViewCompat.setOnApplyWindowInsetsListener(keyboardContainer) { view, insets ->
-            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-            val extraMargin = (8 * view.resources.displayMetrics.density).toInt()
+        ViewCompat.setOnApplyWindowInsetsListener(
+            keyboardContainer
+        ) { view, insets ->
+
+            val navigationBarHeight =
+                insets.getInsets(
+                    WindowInsetsCompat.Type.navigationBars()
+                ).bottom
+
+            val extraMargin =
+                (0 * view.resources.displayMetrics.density).toInt()
 
             val params = view.layoutParams
+
             if (params is ViewGroup.MarginLayoutParams) {
-                params.bottomMargin = navBarHeight + extraMargin
+                params.bottomMargin =
+                    navigationBarHeight + extraMargin
+
                 view.layoutParams = params
             }
 
@@ -193,29 +213,46 @@ class CustomKeyboardManager(
     }
 
     private fun setupKeyboardLayout() {
-        val sharedPref = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
-        val layoutKey = sharedPref.getString("keyboard_layout", "default") ?: "default"
+        val sharedPref = activity.getSharedPreferences(
+            "notebase_prefs",
+            Context.MODE_PRIVATE
+        )
+
+        val layoutKey =
+            sharedPref.getString(
+                "keyboard_layout",
+                "default"
+            ) ?: "default"
 
         val safeLayoutKey = when (layoutKey) {
-            "default", "qwerty_numpad" -> layoutKey
+            "default",
+            "qwerty_numpad" -> layoutKey
+
             else -> "default"
         }
 
         if (safeLayoutKey != layoutKey) {
             sharedPref.edit()
-                .putString("keyboard_layout", "default")
+                .putString(
+                    "keyboard_layout",
+                    "default"
+                )
                 .apply()
         }
 
         val layoutRes = when (safeLayoutKey) {
-            "qwerty_numpad" -> R.layout.layout_keyboard_default2
-            else -> R.layout.layout_keyboard_default
+            "qwerty_numpad" ->
+                R.layout.layout_keyboard_default2
+
+            else ->
+                R.layout.layout_keyboard_default
         }
 
         keyboardContainer.removeAllViews()
 
         val wrapper = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
+
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -225,28 +262,59 @@ class CustomKeyboardManager(
         val closeBar = LinearLayout(activity).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(4), dp(2), dp(4), dp(4))
+
+            setPadding(
+                dp(4),
+                dp(2),
+                dp(4),
+                dp(4)
+            )
+
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
         }
 
-        closeBar.addView(createShortcutButton("ABC−") {
-            changeRowScale(alphaScaleKey, defaultAlphaScale, -stepRowScale)
-        })
+        closeBar.addView(
+            createShortcutButton("ABC−") {
+                changeRowScale(
+                    alphaScaleKey,
+                    defaultAlphaScale,
+                    -stepRowScale
+                )
+            }
+        )
 
-        closeBar.addView(createShortcutButton("ABC+") {
-            changeRowScale(alphaScaleKey, defaultAlphaScale, stepRowScale)
-        })
+        closeBar.addView(
+            createShortcutButton("ABC+") {
+                changeRowScale(
+                    alphaScaleKey,
+                    defaultAlphaScale,
+                    stepRowScale
+                )
+            }
+        )
 
-        closeBar.addView(createShortcutButton("123−") {
-            changeRowScale(numericScaleKey, defaultNumericScale, -stepRowScale)
-        })
+        closeBar.addView(
+            createShortcutButton("123−") {
+                changeRowScale(
+                    numericScaleKey,
+                    defaultNumericScale,
+                    -stepRowScale
+                )
+            }
+        )
 
-        closeBar.addView(createShortcutButton("123+") {
-            changeRowScale(numericScaleKey, defaultNumericScale, stepRowScale)
-        })
+        closeBar.addView(
+            createShortcutButton("123+") {
+                changeRowScale(
+                    numericScaleKey,
+                    defaultNumericScale,
+                    stepRowScale
+                )
+            }
+        )
 
         closeBar.addView(
             View(activity).apply {
@@ -260,13 +328,34 @@ class CustomKeyboardManager(
 
         val btnCloseKeyboard = TextView(activity).apply {
             text = "TUTUP  ✕"
-            setTextColor(ContextCompat.getColor(activity, R.color.cyan_accent))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+
+            setTextColor(
+                ContextCompat.getColor(
+                    activity,
+                    R.color.cyan_accent
+                )
+            )
+
+            setTextSize(
+                TypedValue.COMPLEX_UNIT_SP,
+                12f
+            )
+
             typeface = Typeface.DEFAULT_BOLD
             gravity = Gravity.CENTER
             includeFontPadding = false
-            setPadding(dp(12), dp(7), dp(12), dp(7))
-            setBackgroundResource(R.drawable.bg_keyboard_button)
+
+            setPadding(
+                dp(12),
+                dp(7),
+                dp(12),
+                dp(7)
+            )
+
+            setBackgroundResource(
+                R.drawable.bg_keyboard_button
+            )
+
             isClickable = true
             isFocusable = true
 
@@ -285,9 +374,14 @@ class CustomKeyboardManager(
         closeBar.addView(btnCloseKeyboard)
         wrapper.addView(closeBar)
 
-        val keyboardView = LayoutInflater.from(activity).inflate(layoutRes, wrapper, false)
-        wrapper.addView(keyboardView)
+        val keyboardView =
+            LayoutInflater.from(activity).inflate(
+                layoutRes,
+                wrapper,
+                false
+            )
 
+        wrapper.addView(keyboardView)
         keyboardContainer.addView(wrapper)
 
         applyKeyboardHeightScale(keyboardView)
@@ -296,96 +390,180 @@ class CustomKeyboardManager(
         applyKeyboardTextSize(keyboardView)
 
         val buttonIds = listOf(
-            R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4,
-            R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9,
+            R.id.btn0,
+            R.id.btn1,
+            R.id.btn2,
+            R.id.btn3,
+            R.id.btn4,
+            R.id.btn5,
+            R.id.btn6,
+            R.id.btn7,
+            R.id.btn8,
+            R.id.btn9,
 
-            R.id.btnQ, R.id.btnW, R.id.btnE, R.id.btnR, R.id.btnT,
-            R.id.btnY, R.id.btnU, R.id.btnI, R.id.btnO, R.id.btnP,
+            R.id.btnQ,
+            R.id.btnW,
+            R.id.btnE,
+            R.id.btnR,
+            R.id.btnT,
+            R.id.btnY,
+            R.id.btnU,
+            R.id.btnI,
+            R.id.btnO,
+            R.id.btnP,
 
-            R.id.btnA, R.id.btnS, R.id.btnD, R.id.btnF, R.id.btnG,
-            R.id.btnH, R.id.btnJ, R.id.btnK, R.id.btnL,
+            R.id.btnA,
+            R.id.btnS,
+            R.id.btnD,
+            R.id.btnF,
+            R.id.btnG,
+            R.id.btnH,
+            R.id.btnJ,
+            R.id.btnK,
+            R.id.btnL,
 
-            R.id.btnZ, R.id.btnX, R.id.btnC, R.id.btnV,
-            R.id.btnB, R.id.btnN, R.id.btnM,
+            R.id.btnZ,
+            R.id.btnX,
+            R.id.btnC,
+            R.id.btnV,
+            R.id.btnB,
+            R.id.btnN,
+            R.id.btnM,
 
-            R.id.btnSlash, R.id.btnAsterisk,
-            R.id.btnComma, R.id.btnDot
+            R.id.btnSlash,
+            R.id.btnAsterisk,
+            R.id.btnComma,
+            R.id.btnDot
         )
 
         buttonIds.forEach { id ->
-            keyboardView.findViewById<View>(id)?.setOnClickListener {
-                if (it is Button) {
-                    appendText(it.text.toString())
+            keyboardView
+                .findViewById<View>(id)
+                ?.setOnClickListener { clickedView ->
+
+                    if (clickedView is Button) {
+                        appendText(
+                            clickedView.text.toString()
+                        )
+                    }
+                }
+        }
+
+        keyboardView
+            .findViewById<View>(R.id.btnClear)
+            ?.setOnClickListener {
+                clearText()
+            }
+
+        keyboardView
+            .findViewById<View>(R.id.btnTutup)
+            ?.setOnClickListener {
+                clearText()
+            }
+
+        keyboardView
+            .findViewById<View>(R.id.btnBackspace)
+            ?.setOnClickListener {
+                deleteChar()
+            }
+
+        keyboardView
+            .findViewById<View>(R.id.btnBackspaceAlt)
+            ?.setOnClickListener {
+                deleteChar()
+            }
+
+        keyboardView
+            .findViewById<View>(R.id.btnSpace)
+            ?.setOnClickListener {
+                appendText(" ")
+            }
+
+        keyboardView
+            .findViewById<View>(R.id.btnSwitchLayout)
+            ?.setOnClickListener {
+
+                val currentLayout =
+                    sharedPref.getString(
+                        "keyboard_layout",
+                        "default"
+                    ) ?: "default"
+
+                val nextLayout =
+                    if (currentLayout == "default") {
+                        "qwerty_numpad"
+                    } else {
+                        "default"
+                    }
+
+                sharedPref.edit()
+                    .putString(
+                        "keyboard_layout",
+                        nextLayout
+                    )
+                    .apply()
+
+                setupKeyboardLayout()
+
+                keyboardContainer.visibility =
+                    View.VISIBLE
+
+                activeEditText?.requestFocus()
+
+                activeEditText?.let {
+                    forceHideAndroidKeyboard(it)
                 }
             }
-        }
 
-        keyboardView.findViewById<View>(R.id.btnClear)?.setOnClickListener {
-            clearText()
-        }
+        keyboardView
+            .findViewById<View>(R.id.btnKeyboardSetting)
+            ?.setOnClickListener {
 
-        keyboardView.findViewById<View>(R.id.btnTutup)?.setOnClickListener {
-            clearText()
-        }
+                forceHideAndroidKeyboard()
 
-        keyboardView.findViewById<View>(R.id.btnBackspace)?.setOnClickListener {
-            deleteChar()
-        }
+                val intent = Intent(
+                    activity,
+                    KeyboardSettingsActivity::class.java
+                )
 
-        keyboardView.findViewById<View>(R.id.btnBackspaceAlt)?.setOnClickListener {
-            deleteChar()
-        }
-
-        keyboardView.findViewById<View>(R.id.btnSpace)?.setOnClickListener {
-            appendText(" ")
-        }
-
-        keyboardView.findViewById<View>(R.id.btnSwitchLayout)?.setOnClickListener {
-            val currentLayout = sharedPref.getString("keyboard_layout", "default") ?: "default"
-
-            val nextLayout = if (currentLayout == "default") {
-                "qwerty_numpad"
-            } else {
-                "default"
+                activity.startActivity(intent)
             }
-
-            sharedPref.edit()
-                .putString("keyboard_layout", nextLayout)
-                .apply()
-
-            setupKeyboardLayout()
-            keyboardContainer.visibility = View.VISIBLE
-            activeEditText?.requestFocus()
-            activeEditText?.let {
-                forceHideAndroidKeyboard(it)
-            }
-        }
-
-        keyboardView.findViewById<View>(R.id.btnKeyboardSetting)?.setOnClickListener {
-            forceHideAndroidKeyboard()
-            val intent = Intent(activity, KeyboardSettingsActivity::class.java)
-            activity.startActivity(intent)
-        }
-
-        keyboardView.findViewById<View>(R.id.btnCursorLeft)?.setOnClickListener {
-            moveCursorLeft()
-        }
-
-        keyboardView.findViewById<View>(R.id.btnCursorRight)?.setOnClickListener {
-            moveCursorRight()
-        }
     }
 
-    private fun createShortcutButton(textValue: String, onClick: () -> Unit): TextView {
+    private fun createShortcutButton(
+        textValue: String,
+        onClick: () -> Unit
+    ): TextView {
         return TextView(activity).apply {
             text = textValue
-            setTextColor(ContextCompat.getColor(activity, R.color.white_text))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
+
+            setTextColor(
+                ContextCompat.getColor(
+                    activity,
+                    R.color.white_text
+                )
+            )
+
+            setTextSize(
+                TypedValue.COMPLEX_UNIT_SP,
+                11f
+            )
+
             typeface = Typeface.DEFAULT_BOLD
             gravity = Gravity.CENTER
             includeFontPadding = false
-            setPadding(dp(8), dp(7), dp(8), dp(7))
-            setBackgroundResource(R.drawable.bg_keyboard_button)
+
+            setPadding(
+                dp(8),
+                dp(7),
+                dp(8),
+                dp(7)
+            )
+
+            setBackgroundResource(
+                R.drawable.bg_keyboard_button
+            )
+
             isClickable = true
             isFocusable = true
 
@@ -402,19 +580,39 @@ class CustomKeyboardManager(
         }
     }
 
-    private fun changeRowScale(key: String, defaultValue: Float, delta: Float) {
-        val prefs = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
-        val current = prefs.getFloat(key, defaultValue)
+    private fun changeRowScale(
+        key: String,
+        defaultValue: Float,
+        delta: Float
+    ) {
+        val prefs = activity.getSharedPreferences(
+            "notebase_prefs",
+            Context.MODE_PRIVATE
+        )
 
-        val next = (current + delta)
-            .coerceIn(minRowScale, maxRowScale)
+        val current =
+            prefs.getFloat(
+                key,
+                defaultValue
+            )
+
+        val next =
+            (current + delta).coerceIn(
+                minRowScale,
+                maxRowScale
+            )
 
         prefs.edit()
-            .putFloat(key, next)
+            .putFloat(
+                key,
+                next
+            )
             .apply()
 
         setupKeyboardLayout()
-        keyboardContainer.visibility = View.VISIBLE
+
+        keyboardContainer.visibility =
+            View.VISIBLE
 
         activeEditText?.let {
             it.requestFocus()
@@ -422,21 +620,41 @@ class CustomKeyboardManager(
         }
     }
 
-    private fun applyKeyboardHeightScale(root: View) {
-        val prefs = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
-        val scale = prefs.getFloat("keyboard_height_scale", 1.0f)
+    private fun applyKeyboardHeightScale(
+        root: View
+    ) {
+        val prefs = activity.getSharedPreferences(
+            "notebase_prefs",
+            Context.MODE_PRIVATE
+        )
+
+        val scale =
+            prefs.getFloat(
+                "keyboard_height_scale",
+                1.0f
+            )
 
         fun scaleView(view: View) {
             val params = view.layoutParams
 
-            if (params != null && params.height > 0) {
-                params.height = (params.height * scale).toInt()
+            if (
+                params != null &&
+                params.height > 0
+            ) {
+                params.height =
+                    (params.height * scale).toInt()
+
                 view.layoutParams = params
             }
 
             if (view is ViewGroup) {
-                for (i in 0 until view.childCount) {
-                    scaleView(view.getChildAt(i))
+                for (
+                index in
+                0 until view.childCount
+                ) {
+                    scaleView(
+                        view.getChildAt(index)
+                    )
                 }
             }
         }
@@ -444,22 +662,48 @@ class CustomKeyboardManager(
         scaleView(root)
     }
 
-    private fun applyNumericRowScale(root: View) {
-        val prefs = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
-        val scale = prefs.getFloat(numericScaleKey, defaultNumericScale)
-
-        val numericRowIds = setOf(
-            R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4,
-            R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9
+    private fun applyNumericRowScale(
+        root: View
+    ) {
+        val prefs = activity.getSharedPreferences(
+            "notebase_prefs",
+            Context.MODE_PRIVATE
         )
 
-        fun hasDirectNumericButton(group: ViewGroup): Boolean {
-            for (i in 0 until group.childCount) {
-                val child = group.getChildAt(i)
+        val scale =
+            prefs.getFloat(
+                numericScaleKey,
+                defaultNumericScale
+            )
+
+        val numericRowIds = setOf(
+            R.id.btn0,
+            R.id.btn1,
+            R.id.btn2,
+            R.id.btn3,
+            R.id.btn4,
+            R.id.btn5,
+            R.id.btn6,
+            R.id.btn7,
+            R.id.btn8,
+            R.id.btn9
+        )
+
+        fun hasDirectNumericButton(
+            group: ViewGroup
+        ): Boolean {
+            for (
+            index in
+            0 until group.childCount
+            ) {
+                val child =
+                    group.getChildAt(index)
+
                 if (child.id in numericRowIds) {
                     return true
                 }
             }
+
             return false
         }
 
@@ -467,13 +711,24 @@ class CustomKeyboardManager(
             if (view is ViewGroup) {
                 val params = view.layoutParams
 
-                if (params != null && params.height > 0 && hasDirectNumericButton(view)) {
-                    params.height = (params.height * scale).toInt()
+                if (
+                    params != null &&
+                    params.height > 0 &&
+                    hasDirectNumericButton(view)
+                ) {
+                    params.height =
+                        (params.height * scale).toInt()
+
                     view.layoutParams = params
                 }
 
-                for (i in 0 until view.childCount) {
-                    apply(view.getChildAt(i))
+                for (
+                index in
+                0 until view.childCount
+                ) {
+                    apply(
+                        view.getChildAt(index)
+                    )
                 }
             }
         }
@@ -481,28 +736,66 @@ class CustomKeyboardManager(
         apply(root)
     }
 
-    private fun applyAlphaRowScale(root: View) {
-        val prefs = activity.getSharedPreferences("notebase_prefs", Context.MODE_PRIVATE)
-        val scale = prefs.getFloat(alphaScaleKey, defaultAlphaScale)
-
-        val alphaRowIds = setOf(
-            R.id.btnQ, R.id.btnW, R.id.btnE, R.id.btnR, R.id.btnT,
-            R.id.btnY, R.id.btnU, R.id.btnI, R.id.btnO, R.id.btnP,
-
-            R.id.btnA, R.id.btnS, R.id.btnD, R.id.btnF, R.id.btnG,
-            R.id.btnH, R.id.btnJ, R.id.btnK, R.id.btnL,
-
-            R.id.btnZ, R.id.btnX, R.id.btnC, R.id.btnV,
-            R.id.btnB, R.id.btnN, R.id.btnM
+    private fun applyAlphaRowScale(
+        root: View
+    ) {
+        val prefs = activity.getSharedPreferences(
+            "notebase_prefs",
+            Context.MODE_PRIVATE
         )
 
-        fun hasDirectAlphaButton(group: ViewGroup): Boolean {
-            for (i in 0 until group.childCount) {
-                val child = group.getChildAt(i)
+        val scale =
+            prefs.getFloat(
+                alphaScaleKey,
+                defaultAlphaScale
+            )
+
+        val alphaRowIds = setOf(
+            R.id.btnQ,
+            R.id.btnW,
+            R.id.btnE,
+            R.id.btnR,
+            R.id.btnT,
+            R.id.btnY,
+            R.id.btnU,
+            R.id.btnI,
+            R.id.btnO,
+            R.id.btnP,
+
+            R.id.btnA,
+            R.id.btnS,
+            R.id.btnD,
+            R.id.btnF,
+            R.id.btnG,
+            R.id.btnH,
+            R.id.btnJ,
+            R.id.btnK,
+            R.id.btnL,
+
+            R.id.btnZ,
+            R.id.btnX,
+            R.id.btnC,
+            R.id.btnV,
+            R.id.btnB,
+            R.id.btnN,
+            R.id.btnM
+        )
+
+        fun hasDirectAlphaButton(
+            group: ViewGroup
+        ): Boolean {
+            for (
+            index in
+            0 until group.childCount
+            ) {
+                val child =
+                    group.getChildAt(index)
+
                 if (child.id in alphaRowIds) {
                     return true
                 }
             }
+
             return false
         }
 
@@ -510,13 +803,24 @@ class CustomKeyboardManager(
             if (view is ViewGroup) {
                 val params = view.layoutParams
 
-                if (params != null && params.height > 0 && hasDirectAlphaButton(view)) {
-                    params.height = (params.height * scale).toInt()
+                if (
+                    params != null &&
+                    params.height > 0 &&
+                    hasDirectAlphaButton(view)
+                ) {
+                    params.height =
+                        (params.height * scale).toInt()
+
                     view.layoutParams = params
                 }
 
-                for (i in 0 until view.childCount) {
-                    apply(view.getChildAt(i))
+                for (
+                index in
+                0 until view.childCount
+                ) {
+                    apply(
+                        view.getChildAt(index)
+                    )
                 }
             }
         }
@@ -524,29 +828,53 @@ class CustomKeyboardManager(
         apply(root)
     }
 
-    private fun applyKeyboardTextSize(root: View) {
+    private fun applyKeyboardTextSize(
+        root: View
+    ) {
         fun apply(view: View) {
             if (view is Button) {
-                val text = view.text?.toString() ?: ""
+                val text =
+                    view.text?.toString() ?: ""
 
                 val sizeSp = when {
-                    text.matches(Regex("[0-9]")) -> 21f
-                    text.matches(Regex("[A-Z]")) -> 20f
-                    text == "/" || text == "*" || text == "," || text == "." -> 18f
-                    text == "←" || text == "→" -> 20f
+                    text.matches(
+                        Regex("[0-9]")
+                    ) -> 21f
+
+                    text.matches(
+                        Regex("[A-Z]")
+                    ) -> 20f
+
+                    text == "/" ||
+                            text == "*" ||
+                            text == "," ||
+                            text == "." -> 18f
+
                     text == "⎵" -> 22f
-                    text == "🔁" || text == "⚙️" -> 17f
+
+                    text == "🔁" ||
+                            text == "⚙️" -> 17f
+
                     else -> 18f
                 }
 
-                view.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+                view.setTextSize(
+                    TypedValue.COMPLEX_UNIT_SP,
+                    sizeSp
+                )
+
                 view.includeFontPadding = false
                 view.isAllCaps = false
             }
 
             if (view is ViewGroup) {
-                for (i in 0 until view.childCount) {
-                    apply(view.getChildAt(i))
+                for (
+                index in
+                0 until view.childCount
+                ) {
+                    apply(
+                        view.getChildAt(index)
+                    )
                 }
             }
         }
@@ -554,11 +882,17 @@ class CustomKeyboardManager(
         apply(root)
     }
 
-    private fun appendText(value: String) {
-        val editText = activeEditText ?: return
+    private fun appendText(
+        value: String
+    ) {
+        val editText =
+            activeEditText ?: return
 
-        val start = editText.selectionStart.coerceAtLeast(0)
-        val end = editText.selectionEnd.coerceAtLeast(0)
+        val start =
+            editText.selectionStart.coerceAtLeast(0)
+
+        val end =
+            editText.selectionEnd.coerceAtLeast(0)
 
         editText.text.replace(
             minOf(start, end),
@@ -568,17 +902,32 @@ class CustomKeyboardManager(
     }
 
     private fun deleteChar() {
-        val editText = activeEditText ?: return
+        val editText =
+            activeEditText ?: return
 
-        val start = editText.selectionStart
-        val end = editText.selectionEnd
+        val start =
+            editText.selectionStart
 
-        if (start < 0 || end < 0) return
+        val end =
+            editText.selectionEnd
+
+        if (
+            start < 0 ||
+            end < 0
+        ) {
+            return
+        }
 
         if (start != end) {
-            editText.text.delete(minOf(start, end), maxOf(start, end))
+            editText.text.delete(
+                minOf(start, end),
+                maxOf(start, end)
+            )
         } else if (start > 0) {
-            editText.text.delete(start - 1, start)
+            editText.text.delete(
+                start - 1,
+                start
+            )
         }
     }
 
@@ -586,26 +935,12 @@ class CustomKeyboardManager(
         activeEditText?.setText("")
     }
 
-    private fun moveCursorLeft() {
-        val editText = activeEditText ?: return
-        val current = editText.selectionStart
-
-        if (current > 0) {
-            editText.setSelection(current - 1)
-        }
-    }
-
-    private fun moveCursorRight() {
-        val editText = activeEditText ?: return
-        val current = editText.selectionStart
-        val max = editText.text.length
-
-        if (current < max) {
-            editText.setSelection(current + 1)
-        }
-    }
-
     private fun dp(value: Int): Int {
-        return (value * activity.resources.displayMetrics.density).toInt()
+        return (
+                value *
+                        activity.resources
+                            .displayMetrics
+                            .density
+                ).toInt()
     }
 }

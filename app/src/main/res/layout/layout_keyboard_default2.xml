@@ -4,11 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/black_bg"
-    android:orientation="vertical"
-    android:padding="4dp"
-    android:paddingBottom="12dp"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:orientation="vertical"
+    android:padding="3dp"
+    android:paddingBottom="12dp">
 
     <!-- / 1 2 3 * -->
     <LinearLayout
@@ -21,38 +21,39 @@
             android:id="@+id/btnSlash"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="0.65"
+            android:focusable="false"
             android:text="/"
-            android:textSize="15sp"
-            android:focusable="false" />
+            android:textSize="15sp" />
 
         <Button
             android:id="@+id/btn1"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="1.23"
-            android:text="1"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="1" />
 
         <Button
             android:id="@+id/btn2"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="1.24"
-            android:text="2"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="2" />
 
         <Button
             android:id="@+id/btn3"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="1.23"
-            android:text="3"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="3" />
 
         <Button
             android:id="@+id/btnAsterisk"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="0.65"
+            android:focusable="false"
             android:text="*"
-            android:textSize="15sp"
-            android:focusable="false" />
+            android:textSize="15sp" />
+
     </LinearLayout>
 
     <!-- , 4 5 6 . -->
@@ -66,41 +67,42 @@
             android:id="@+id/btnComma"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="0.65"
+            android:focusable="false"
             android:text=","
-            android:textSize="15sp"
-            android:focusable="false" />
+            android:textSize="15sp" />
 
         <Button
             android:id="@+id/btn4"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="1.23"
-            android:text="4"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="4" />
 
         <Button
             android:id="@+id/btn5"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="1.24"
-            android:text="5"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="5" />
 
         <Button
             android:id="@+id/btn6"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="1.23"
-            android:text="6"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="6" />
 
         <Button
             android:id="@+id/btnDot"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="0.65"
+            android:focusable="false"
             android:text="."
-            android:textSize="15sp"
-            android:focusable="false" />
+            android:textSize="15sp" />
+
     </LinearLayout>
 
-    <!-- Cursor 7 8 9 Cursor -->
+    <!-- Switch 7 8 9 Settings -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="42dp"
@@ -108,41 +110,42 @@
         android:weightSum="5">
 
         <Button
-            android:id="@+id/btnCursorLeft"
+            android:id="@+id/btnSwitchLayout"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="0.65"
-            android:text="←"
-            android:textSize="17sp"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="🔁"
+            android:textSize="15sp" />
 
         <Button
             android:id="@+id/btn7"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="1.23"
-            android:text="7"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="7" />
 
         <Button
             android:id="@+id/btn8"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="1.24"
-            android:text="8"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="8" />
 
         <Button
             android:id="@+id/btn9"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="1.23"
-            android:text="9"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="9" />
 
         <Button
-            android:id="@+id/btnCursorRight"
+            android:id="@+id/btnKeyboardSetting"
             style="@style/KeyboardBtnNumeric"
             android:layout_weight="0.65"
-            android:text="→"
-            android:textSize="17sp"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="⚙️"
+            android:textSize="15sp" />
+
     </LinearLayout>
 
     <!-- Backspace 0 Clear -->
@@ -156,12 +159,13 @@
             android:id="@+id/btnBackspaceAlt"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2"
             android:layout_margin="2dp"
+            android:layout_weight="2"
             android:background="@drawable/bg_keyboard_button"
-            android:src="@drawable/ic_backspace_keyboard"
-            android:scaleType="center"
+            android:contentDescription="Hapus satu karakter"
             android:focusable="false"
+            android:scaleType="center"
+            android:src="@drawable/ic_backspace_keyboard"
             app:tint="@color/white_text" />
 
         <Button
@@ -170,20 +174,22 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="3"
-            android:text="0"
-            android:focusable="false" />
+            android:focusable="false"
+            android:text="0" />
 
         <ImageButton
             android:id="@+id/btnClear"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2"
             android:layout_margin="2dp"
+            android:layout_weight="2"
             android:background="@drawable/bg_keyboard_button"
-            android:src="@drawable/ic_clear_circle"
-            android:scaleType="center"
+            android:contentDescription="Hapus semua input"
             android:focusable="false"
+            android:scaleType="center"
+            android:src="@drawable/ic_clear_circle"
             app:tint="@color/red_delete" />
+
     </LinearLayout>
 
     <View
@@ -198,16 +204,66 @@
         android:layout_height="38dp"
         android:orientation="horizontal">
 
-        <Button android:id="@+id/btnQ" style="@style/KeyboardBtnAlpha" android:text="Q" android:focusable="false" />
-        <Button android:id="@+id/btnW" style="@style/KeyboardBtnAlpha" android:text="W" android:focusable="false" />
-        <Button android:id="@+id/btnE" style="@style/KeyboardBtnAlpha" android:text="E" android:focusable="false" />
-        <Button android:id="@+id/btnR" style="@style/KeyboardBtnAlpha" android:text="R" android:focusable="false" />
-        <Button android:id="@+id/btnT" style="@style/KeyboardBtnAlpha" android:text="T" android:focusable="false" />
-        <Button android:id="@+id/btnY" style="@style/KeyboardBtnAlpha" android:text="Y" android:focusable="false" />
-        <Button android:id="@+id/btnU" style="@style/KeyboardBtnAlpha" android:text="U" android:focusable="false" />
-        <Button android:id="@+id/btnI" style="@style/KeyboardBtnAlpha" android:text="I" android:focusable="false" />
-        <Button android:id="@+id/btnO" style="@style/KeyboardBtnAlpha" android:text="O" android:focusable="false" />
-        <Button android:id="@+id/btnP" style="@style/KeyboardBtnAlpha" android:text="P" android:focusable="false" />
+        <Button
+            android:id="@+id/btnQ"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="Q" />
+
+        <Button
+            android:id="@+id/btnW"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="W" />
+
+        <Button
+            android:id="@+id/btnE"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="E" />
+
+        <Button
+            android:id="@+id/btnR"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="R" />
+
+        <Button
+            android:id="@+id/btnT"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="T" />
+
+        <Button
+            android:id="@+id/btnY"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="Y" />
+
+        <Button
+            android:id="@+id/btnU"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="U" />
+
+        <Button
+            android:id="@+id/btnI"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="I" />
+
+        <Button
+            android:id="@+id/btnO"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="O" />
+
+        <Button
+            android:id="@+id/btnP"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="P" />
+
     </LinearLayout>
 
     <!-- A S D F G H J K L -->
@@ -217,93 +273,170 @@
         android:orientation="horizontal"
         android:paddingHorizontal="16dp">
 
-        <Button android:id="@+id/btnA" style="@style/KeyboardBtnAlpha" android:text="A" android:focusable="false" />
-        <Button android:id="@+id/btnS" style="@style/KeyboardBtnAlpha" android:text="S" android:focusable="false" />
-        <Button android:id="@+id/btnD" style="@style/KeyboardBtnAlpha" android:text="D" android:focusable="false" />
-        <Button android:id="@+id/btnF" style="@style/KeyboardBtnAlpha" android:text="F" android:focusable="false" />
-        <Button android:id="@+id/btnG" style="@style/KeyboardBtnAlpha" android:text="G" android:focusable="false" />
-        <Button android:id="@+id/btnH" style="@style/KeyboardBtnAlpha" android:text="H" android:focusable="false" />
-        <Button android:id="@+id/btnJ" style="@style/KeyboardBtnAlpha" android:text="J" android:focusable="false" />
-        <Button android:id="@+id/btnK" style="@style/KeyboardBtnAlpha" android:text="K" android:focusable="false" />
-        <Button android:id="@+id/btnL" style="@style/KeyboardBtnAlpha" android:text="L" android:focusable="false" />
+        <Button
+            android:id="@+id/btnA"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="A" />
+
+        <Button
+            android:id="@+id/btnS"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="S" />
+
+        <Button
+            android:id="@+id/btnD"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="D" />
+
+        <Button
+            android:id="@+id/btnF"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="F" />
+
+        <Button
+            android:id="@+id/btnG"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="G" />
+
+        <Button
+            android:id="@+id/btnH"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="H" />
+
+        <Button
+            android:id="@+id/btnJ"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="J" />
+
+        <Button
+            android:id="@+id/btnK"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="K" />
+
+        <Button
+            android:id="@+id/btnL"
+            style="@style/KeyboardBtnAlpha"
+            android:focusable="false"
+            android:text="L" />
+
     </LinearLayout>
 
-    <!-- Clear Z X C V B N M Backspace -->
+    <!--
+        X MERAH dan BACKSPACE memanjang setinggi:
+        - baris Z sampai M
+        - baris spasi
+    -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="38dp"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="9">
 
         <ImageButton
             android:id="@+id/btnTutup"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_margin="2dp"
+            android:layout_weight="1.2"
             android:background="@drawable/bg_keyboard_button"
-            android:src="@drawable/ic_clear_circle"
-            android:scaleType="center"
+            android:contentDescription="Hapus semua input"
             android:focusable="false"
+            android:padding="12dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_clear_circle"
             app:tint="@color/red_delete" />
 
-        <Button android:id="@+id/btnZ" style="@style/KeyboardBtnAlpha" android:text="Z" android:focusable="false" />
-        <Button android:id="@+id/btnX" style="@style/KeyboardBtnAlpha" android:text="X" android:focusable="false" />
-        <Button android:id="@+id/btnC" style="@style/KeyboardBtnAlpha" android:text="C" android:focusable="false" />
-        <Button android:id="@+id/btnV" style="@style/KeyboardBtnAlpha" android:text="V" android:focusable="false" />
-        <Button android:id="@+id/btnB" style="@style/KeyboardBtnAlpha" android:text="B" android:focusable="false" />
-        <Button android:id="@+id/btnN" style="@style/KeyboardBtnAlpha" android:text="N" android:focusable="false" />
-        <Button android:id="@+id/btnM" style="@style/KeyboardBtnAlpha" android:text="M" android:focusable="false" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="6.6"
+            android:orientation="vertical">
+
+            <!-- Z X C V B N M -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnZ"
+                    style="@style/KeyboardBtnAlpha"
+                    android:focusable="false"
+                    android:text="Z" />
+
+                <Button
+                    android:id="@+id/btnX"
+                    style="@style/KeyboardBtnAlpha"
+                    android:focusable="false"
+                    android:text="X" />
+
+                <Button
+                    android:id="@+id/btnC"
+                    style="@style/KeyboardBtnAlpha"
+                    android:focusable="false"
+                    android:text="C" />
+
+                <Button
+                    android:id="@+id/btnV"
+                    style="@style/KeyboardBtnAlpha"
+                    android:focusable="false"
+                    android:text="V" />
+
+                <Button
+                    android:id="@+id/btnB"
+                    style="@style/KeyboardBtnAlpha"
+                    android:focusable="false"
+                    android:text="B" />
+
+                <Button
+                    android:id="@+id/btnN"
+                    style="@style/KeyboardBtnAlpha"
+                    android:focusable="false"
+                    android:text="N" />
+
+                <Button
+                    android:id="@+id/btnM"
+                    style="@style/KeyboardBtnAlpha"
+                    android:focusable="false"
+                    android:text="M" />
+
+            </LinearLayout>
+
+            <!-- Spasi penuh pada bagian tengah -->
+            <Button
+                android:id="@+id/btnSpace"
+                style="@style/KeyboardBtnAction"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:focusable="false"
+                android:text="⎵"
+                android:textColor="@color/white_text"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/btnBackspace"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_margin="2dp"
+            android:layout_weight="1.2"
             android:background="@drawable/bg_keyboard_button"
-            android:src="@drawable/ic_backspace_keyboard"
-            android:scaleType="center"
+            android:contentDescription="Hapus satu karakter"
             android:focusable="false"
+            android:padding="12dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_backspace_keyboard"
             app:tint="@color/white_text" />
-    </LinearLayout>
 
-    <!-- Switch Spasi Settings -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:orientation="horizontal"
-        android:weightSum="9">
-
-        <Button
-            android:id="@+id/btnSwitchLayout"
-            style="@style/KeyboardBtnAction"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="🔁"
-            android:textSize="15sp"
-            android:focusable="false" />
-
-        <Button
-            android:id="@+id/btnSpace"
-            style="@style/KeyboardBtnAction"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="7"
-            android:text="⎵"
-            android:textColor="@color/white_text"
-            android:textStyle="bold"
-            android:focusable="false" />
-
-        <Button
-            android:id="@+id/btnKeyboardSetting"
-            style="@style/KeyboardBtnAction"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="⚙️"
-            android:textSize="15sp"
-            android:focusable="false" />
     </LinearLayout>
 
 </LinearLayout>
